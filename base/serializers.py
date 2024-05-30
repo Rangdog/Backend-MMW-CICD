@@ -40,3 +40,87 @@ class CustomResetPasswordConfirmSerializer(serializers.Serializer):
         ResetPasswordToken.objects.filter(user=user).delete()
 
         return attrs
+
+
+class Depot_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Depot
+        fields = '__all__'
+
+
+class Profile_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = '__all__'
+
+
+class Business_Partner_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Business_Partner
+        fields = '__all__'
+
+
+class Category_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+
+class Product_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+
+class Product_Depot_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_Depot
+        fields = '__all__'
+
+
+class Pricelist_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pricelist
+        fields = '__all__'
+
+
+class Product_Price_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_Price
+        fields = '__all__'
+
+
+class Order_Form_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order_Form
+        fields = '__all__'
+
+
+class Order_Detail_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order_Detail
+        fields = '__all__'
+
+
+class Import_Form_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Import_Form
+        fields = '__all__'
+
+
+class Import_Detail_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Import_Detail
+        fields = '__all__'
+
+
+class Export_Form_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Export_Form
+        fields = '__all__'
+
+
+class Export_Detail_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Export_Detail
+        fields = '__all__'
