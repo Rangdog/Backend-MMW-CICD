@@ -20,7 +20,7 @@ class Profile(models.Model):
     email = models.EmailField(unique=True, max_length=100)
 
 
-class Business_Partner(models.Model):
+class BusinessPartner(models.Model):
     name = models.CharField(max_length=100)
     gender = models.BooleanField(null=True)
     email = models.EmailField(unique=True, max_length=100)
@@ -37,9 +37,10 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     unit = models.CharField(max_length=50)
+    in_stock = models.BooleanField(default=False)
 
 
-class Product_Depot(models.Model):
+class ProductDepot(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     depot = models.ForeignKey(Depot, on_delete=models.CASCADE)
     inventory = models.IntegerField()
@@ -50,78 +51,78 @@ class Pricelist(models.Model):
     expired_date = models.DateTimeField()
 
 
-class Product_Price(models.Model):
+class ProductPrice(models.Model):
     pricelist = models.ForeignKey(Pricelist, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=20, decimal_places=2)
 
 
-class Order_Form(models.Model):
-    partner = models.ForeignKey(Business_Partner, on_delete=models.CASCADE)
+class OrderForm(models.Model):
+    partner = models.ForeignKey(BusinessPartner, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     depot = models.ForeignKey(Depot, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=20, decimal_places=2)
 
 
-class Order_Detail(models.Model):
+class OrderDetail(models.Model):
     id = models.CharField(max_length=100, primary_key=True)
-    order = models.ForeignKey(Order_Form, on_delete=models.CASCADE)
+    form = models.ForeignKey(OrderForm, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
-        unique_together = (('order', 'product'),)
+        unique_together = (('form', 'product'),)
         db_table = 'Order_Detail'
 
     def save(self, *args, **kwargs):
-        self.id = f"{self.order_id}-{self.product_id}"
-        super(Order_Detail, self).save(*args, **kwargs)
+        self.id = f"{self.form_id}-{self.product_id}"
+        super(OrderDetail, self).save(*args, **kwargs)
 
 
-class Import_Form(models.Model):
-    order = models.OneToOneField(Order_Form, on_delete=models.CASCADE)
+class ImportForm(models.Model):
+    order = models.OneToOneField(OrderForm, on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=20, decimal_places=2)
 
 
-class Import_Detail(models.Model):
+class ImportDetail(models.Model):
     id = models.CharField(max_length=100, primary_key=True)
-    id_import = models.ForeignKey(Import_Form, on_delete=models.CASCADE)
-    order_detail = models.OneToOneField(Order_Detail, on_delete=models.CASCADE)
+    form = models.ForeignKey(ImportForm, on_delete=models.CASCADE)
+    order_detail = models.OneToOneField(OrderDetail, on_delete=models.CASCADE)
     quantity = models.IntegerField()
 
     class Meta:
-        unique_together = (('id_import', 'order_detail'),)
+        unique_together = (('form', 'order_detail'),)
         db_table = 'Import_Detail'
 
     def save(self, *args, **kwargs):
-        self.id = f"{self.id_import_id}-{self.order_detail_id}"
-        super(Order_Detail, self).save(*args, **kwargs)
+        self.id = f"{self.form_id}-{self.order_detail_id}"
+        super(ImportDetail, self).save(*args, **kwargs)
 
 
-class Export_Form(models.Model):
+class ExportForm(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    partner = models.ForeignKey(Business_Partner, on_delete=models.CASCADE)
+    partner = models.ForeignKey(BusinessPartner, on_delete=models.CASCADE)
     depot = models.ForeignKey(Depot, on_delete=models.CASCADE)
     pricelist = models.ForeignKey(Pricelist, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=20, decimal_places=2)
 
 
-class Export_Detail(models.Model):
+class ExportDetail(models.Model):
     id = models.CharField(max_length=100, primary_key=True)
-    export = models.ForeignKey(Export_Form, on_delete=models.CASCADE)
+    form = models.ForeignKey(ExportForm, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
-        unique_together = (('export', 'product'),)
+        unique_together = (('form', 'product'),)
         db_table = 'Export_Detail'
 
     def save(self, *args, **kwargs):
-        self.id = f"{self.export_id}-{self.product_id}"
-        super(Order_Detail, self).save(*args, **kwargs)
+        self.id = f"{self.form_id}-{self.product_id}"
+        super(ExportDetail, self).save(*args, **kwargs)

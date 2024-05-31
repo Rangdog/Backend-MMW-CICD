@@ -92,7 +92,7 @@ class Profile_viewset(viewsets.ModelViewSet):
 
 
 class Business_Partner_viewset(viewsets.ModelViewSet):
-    queryset = Business_Partner.objects.all()
+    queryset = BusinessPartner.objects.all()
     serializer_class = Business_Partner_Serializer
 
 
@@ -107,7 +107,7 @@ class Product_viewset(viewsets.ModelViewSet):
 
 
 class Product_Depot_viewset(viewsets.ModelViewSet):
-    queryset = Product_Depot.objects.all()
+    queryset = ProductDepot.objects.all()
     serializer_class = Product_Depot_Serializer
 
 
@@ -117,35 +117,35 @@ class Pricelist_viewset(viewsets.ModelViewSet):
 
 
 class Product_Price_viewset(viewsets.ModelViewSet):
-    queryset = Product_Price.objects.all()
+    queryset = ProductPrice.objects.all()
     serializer_class = Product_Price_Serializer
 
 
 class Order_Form_viewset(viewsets.ModelViewSet):
-    queryset = Order_Form.objects.all()
+    queryset = OrderForm.objects.all()
     serializer_class = Order_Form_Serializer
 
 
 class Order_Detail_viewset(viewsets.ModelViewSet):
-    queryset = Order_Detail.objects.all()
+    queryset = OrderDetail.objects.all()
     serializer_class = Order_Detail_Serializer
 
 
 class Import_Form_viewset(viewsets.ModelViewSet):
-    queryset = Import_Form.objects.all()
+    queryset = ImportForm.objects.all()
     serializer_class = Import_Form_Serializer
 
 
 class Import_Detail_viewset(viewsets.ModelViewSet):
-    queryset = Import_Detail.objects.all()
+    queryset = ImportDetail.objects.all()
     serializer_class = Import_Detail_Serializer
 
 
 class Export_Form_viewset(viewsets.ModelViewSet):
-    queryset = Export_Form.objects.all()
+    queryset = ExportForm.objects.all()
     serializer_class = Export_Form_Serializer
 
 
 class Export_Detail_viewset(viewsets.ModelViewSet):
-    queryset = Export_Detail.objects.all()
+    queryset = ExportDetail.objects.all()
     serializer_class = Export_Detail_Serializer

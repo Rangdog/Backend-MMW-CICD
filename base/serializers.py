@@ -56,7 +56,7 @@ class Profile_Serializer(serializers.ModelSerializer):
 
 class Business_Partner_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = Business_Partner
+        model = BusinessPartner
         fields = '__all__'
 
 
@@ -74,7 +74,7 @@ class Product_Serializer(serializers.ModelSerializer):
 
 class Product_Depot_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = Product_Depot
+        model = ProductDepot
         fields = '__all__'
 
 
@@ -86,41 +86,41 @@ class Pricelist_Serializer(serializers.ModelSerializer):
 
 class Product_Price_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = Product_Price
+        model = ProductPrice
         fields = '__all__'
 
 
 class Order_Form_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = Order_Form
+        model = OrderForm
         fields = '__all__'
 
 
 class Order_Detail_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = Order_Detail
+        model = OrderDetail
         fields = '__all__'
 
 
 class Import_Form_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = Import_Form
+        model = ImportForm
         fields = '__all__'
 
 
 class Import_Detail_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = Import_Detail
+        model = ImportDetail
         fields = '__all__'
 
 
 class Export_Form_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = Export_Form
+        model = ExportForm
         fields = '__all__'
 
 
 class Export_Detail_Serializer(serializers.ModelSerializer):
     class Meta:
-        model = Export_Detail
+        model = ExportDetail
         fields = '__all__'
