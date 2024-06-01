@@ -81,71 +81,71 @@ class CustomResetPasswordConfirmView(APIView):
 #             return self.retrieve(request, *args, **kwargs)
 #         return self.list(request, *args, **kwargs)
 
-class Depot_viewset(viewsets.ModelViewSet):
+class Depotviewset(viewsets.ModelViewSet):
     queryset = Depot.objects.all()
-    serializer_class = Depot_Serializer
+    serializer_class = DepotSerializer
 
 
-class Profile_viewset(viewsets.ModelViewSet):
+class Profileviewset(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
-    serializer_class = Profile_Serializer
+    serializer_class = ProfileSerializer
 
 
-class Business_Partner_viewset(viewsets.ModelViewSet):
+class BusinessPartnerviewset(viewsets.ModelViewSet):
     queryset = BusinessPartner.objects.all()
-    serializer_class = Business_Partner_Serializer
+    serializer_class = BusinessPartnerSerializer
 
 
-class Category_viewset(viewsets.ModelViewSet):
+class Categoryviewset(viewsets.ModelViewSet):
     queryset = Category.objects.all()
-    serializer_class = Category_Serializer
+    serializer_class = CategorySerializer
 
 
-class Product_viewset(viewsets.ModelViewSet):
+class Productviewset(viewsets.ModelViewSet):
     queryset = Product.objects.all()
-    serializer_class = Product_Serializer
+    serializer_class = ProductSerializer
 
 
-class Product_Depot_viewset(viewsets.ModelViewSet):
+class ProductDepotviewset(viewsets.ModelViewSet):
     queryset = ProductDepot.objects.all()
-    serializer_class = Product_Depot_Serializer
+    serializer_class = ProductDepotSerializer
 
 
-class Pricelist_viewset(viewsets.ModelViewSet):
+class Pricelistviewset(viewsets.ModelViewSet):
     queryset = Pricelist.objects.all()
-    serializer_class = Pricelist_Serializer
+    serializer_class = PricelistSerializer
 
 
-class Product_Price_viewset(viewsets.ModelViewSet):
+class ProductPriceviewset(viewsets.ModelViewSet):
     queryset = ProductPrice.objects.all()
-    serializer_class = Product_Price_Serializer
+    serializer_class = ProductPriceSerializer
 
 
-class Order_Form_viewset(viewsets.ModelViewSet):
+class OrderFormviewset(viewsets.ModelViewSet):
     queryset = OrderForm.objects.all()
-    serializer_class = Order_Form_Serializer
+    serializer_class = OrderFormSerializer
 
 
-class Order_Detail_viewset(viewsets.ModelViewSet):
+class OrderDetailviewset(viewsets.ModelViewSet):
     queryset = OrderDetail.objects.all()
-    serializer_class = Order_Detail_Serializer
+    serializer_class = OrderDetailSerializer
 
 
-class Import_Form_viewset(viewsets.ModelViewSet):
+class ImportFormviewset(viewsets.ModelViewSet):
     queryset = ImportForm.objects.all()
-    serializer_class = Import_Form_Serializer
+    serializer_class = ImportFormSerializer
 
 
-class Import_Detail_viewset(viewsets.ModelViewSet):
+class ImportDetailviewset(viewsets.ModelViewSet):
     queryset = ImportDetail.objects.all()
-    serializer_class = Import_Detail_Serializer
+    serializer_class = ImportDetailSerializer
 
 
 class Export_Form_viewset(viewsets.ModelViewSet):
     queryset = ExportForm.objects.all()
-    serializer_class = Export_Form_Serializer
+    serializer_class = ExportFormSerializer
 
 
 class Export_Detail_viewset(viewsets.ModelViewSet):
     queryset = ExportDetail.objects.all()
-    serializer_class = Export_Detail_Serializer
+    serializer_class = ExportDetailSerializer

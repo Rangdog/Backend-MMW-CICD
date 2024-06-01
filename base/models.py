@@ -48,7 +48,7 @@ class ProductDepot(models.Model):
 
 class Pricelist(models.Model):
     applied_date = models.DateTimeField(auto_now_add=True)
-    expired_date = models.DateTimeField()
+    expired_date = models.DateTimeField(blank=True)
 
 
 class ProductPrice(models.Model):
@@ -65,11 +65,17 @@ class OrderForm(models.Model):
     total = models.DecimalField(max_digits=20, decimal_places=2)
 
 
-class OrderDetail(models.Model):
+class commom_infor_detail(models.Model):
     id = models.CharField(max_length=100, primary_key=True)
+    quantity = models.IntegerField()
+
+    class Meta:
+        abstract = True
+
+
+class OrderDetail(commom_infor_detail):
     form = models.ForeignKey(OrderForm, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
     price = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
@@ -88,11 +94,9 @@ class ImportForm(models.Model):
     total = models.DecimalField(max_digits=20, decimal_places=2)
 
 
-class ImportDetail(models.Model):
-    id = models.CharField(max_length=100, primary_key=True)
+class ImportDetail(commom_infor_detail):
     form = models.ForeignKey(ImportForm, on_delete=models.CASCADE)
     order_detail = models.OneToOneField(OrderDetail, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
 
     class Meta:
         unique_together = (('form', 'order_detail'),)
@@ -112,11 +116,9 @@ class ExportForm(models.Model):
     total = models.DecimalField(max_digits=20, decimal_places=2)
 
 
-class ExportDetail(models.Model):
-    id = models.CharField(max_length=100, primary_key=True)
+class ExportDetail(commom_infor_detail):
     form = models.ForeignKey(ExportForm, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
     price = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
