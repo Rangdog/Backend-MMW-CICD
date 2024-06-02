@@ -31,7 +31,6 @@ class LoginAPIView(generics.CreateAPIView):
                 return Response(
                     {
                         "profile_id": profile_id,
-                        "user": self.serializer_class(user).data,
                         "token": token
                     }
                 )
