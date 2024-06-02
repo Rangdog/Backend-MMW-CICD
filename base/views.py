@@ -91,6 +91,15 @@ class Profileviewset(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
+    def list(self, request, *args, **kwargs):
+        user = request.user
+        try:
+            profile = Profile.objects.get(user=user)
+        except Profile.DoesNotExist:
+            return Response({"detail": "Profile not found."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class BusinessPartnerviewset(viewsets.ModelViewSet):
     queryset = BusinessPartner.objects.all()
