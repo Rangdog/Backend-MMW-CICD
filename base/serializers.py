@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 
 
 class CustomEmailSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=100)
     email = serializers.EmailField()
 
     def validate_email(self, value):

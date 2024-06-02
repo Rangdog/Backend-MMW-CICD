@@ -23,8 +23,9 @@ class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
+        username = serializer.validated_data['username']
         user_profile = Profile.objects.get(email=email)
-        if user_profile:
+        if user_profile.user.username == username:
             user = user_profile.user
             # Tạo token reset password
             token = ResetPasswordToken.objects.create(user=user)
@@ -55,7 +56,7 @@ class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
 
             return Response({'status': 'OK'})
         else:
-            return Response({'status': 'Không tìm thấy email'})
+            return Response({'status': 'Lỗi, Vui lòng kiểm tra lại user và email'})
 
 
 class CustomResetPasswordConfirmView(APIView):
