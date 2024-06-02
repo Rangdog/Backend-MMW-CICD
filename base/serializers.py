@@ -193,14 +193,30 @@ class ImportFormSerializer(serializers.ModelSerializer):
 
 
 class ImportDetailSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField(read_only=True)
+    price = serializers.SerializerMethodField(read_only=True)
+    order_detail = serializers.PrimaryKeyRelatedField(
+        queryset=OrderDetail.objects.all(), write_only=True)
+
     class Meta:
         model = ImportDetail
         fields = (
             'form',
             'product',
+            'order_detail',
             'quantity',
             'price',
         )
+
+    def get_product(self, obj):
+        return {
+            "id": obj.order_detail.product.id,
+            'name': obj.order_detail.product.name,
+            'unit': obj.order_detail.product.unit,
+        }
+
+    def get_price(self, obj):
+        return obj.order_detail.price
 
 
 class ExportFormSerializer(serializers.ModelSerializer):
