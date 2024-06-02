@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from knox.auth import TokenAuthentication
 from .serializers import *
 from .models import *
+from base.models import Profile
 from rest_framework.response import Response
 from knox.models import AuthToken
 
@@ -24,9 +25,12 @@ class LoginAPIView(generics.CreateAPIView):
 
             user = authenticate(username=username, password=password)
             if user:
+                profile_id = Profile.objects.get(user=user).id
+
                 _, token = AuthToken.objects.create(user)
                 return Response(
                     {
+                        "profile_id": profile_id,
                         "user": self.serializer_class(user).data,
                         "token": token
                     }
