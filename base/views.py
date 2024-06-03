@@ -180,6 +180,64 @@ class Productviewset(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        name = data.get('name', "")
+        unit = data.get('unit', "")
+        category = data.get('category', None)
+        if isinstance(category, str):
+            try:
+                with atomic():
+                    tmp_category = Category.objects.create(name=category)
+                    Product.objects.create(
+                        category=tmp_category, name=name, unit=unit)
+                    Response("Thành công", status=status.HTTP_201_CREATED)
+            except Exception as e:
+                set_rollback(True)
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            try:
+                with atomic():
+                    tmp_category = Category.objects.get(pk=category.get('id'))
+                    Product.objects.create(
+                        category=tmp_category, name=name, unit=unit)
+                    Response("Thành công", status=status.HTTP_201_CREATED)
+            except Exception as e:
+                set_rollback(True)
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        name = data.get('name', "")
+        unit = data.get('unit', "")
+        category = data.get('category', None)
+        pk = kwargs.get('pk')
+        product = Product.objects.get(pk=pk)
+        if isinstance(category, str):
+            try:
+                with atomic():
+                    tmp_category = Category.objects.create(name=category)
+                    product.category = tmp_category
+                    product.name = name
+                    product.unit = unit
+                    product.save()
+                    Response("Thành công", status=status.HTTP_201_CREATED)
+            except Exception as e:
+                set_rollback(True)
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            try:
+                with atomic():
+                    tmp_category = Category.objects.get(pk=category.get('id'))
+                    product.category = tmp_category
+                    product.name = name
+                    product.unit = unit
+                    product.save()
+                    Response("Thành công", status=status.HTTP_201_CREATED)
+            except Exception as e:
+                set_rollback(True)
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ProductDepotviewset(viewsets.ModelViewSet):
     queryset = ProductDepot.objects.all()

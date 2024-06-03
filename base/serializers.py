@@ -95,11 +95,15 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = '__all__'
 
+    def validate(self, value):
+        if type(value) == 'dict':
+            return value
+        category = Category.objects.create(name=value)
+        return CategorySerializer(category).data
+
 
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
-    category_id = serializers.PrimaryKeyRelatedField(
-        queryset=Category.objects.all(), source='category', write_only=True)
     inventory = serializers.SerializerMethodField(read_only=True)
     price = serializers.SerializerMethodField(read_only=True)
 
@@ -111,7 +115,6 @@ class ProductSerializer(serializers.ModelSerializer):
             'unit',
             'inventory',
             'category',
-            'category_id',
             'price',
         )
 
@@ -122,8 +125,21 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_price(self, obj):
         # Lấy price từ ProductPrice
-        product_price = ProductPrice.objects.filter(product=obj).first()
-        return product_price.price if product_price else None
+        product_price = ProductPrice.objects.filter(
+            product=obj, pricelist=Pricelist.objects.last()).first()
+        return product_price.price if product_price else 0
+
+    def create(self, validated_data):
+        category_data = validated_data.pop('category')
+        category_serializer = CategorySerializer(data=category_data)
+
+        if category_serializer.validate():
+            category_instance = category_serializer.save()
+            validated_data['category'] = category_instance
+            product_instance = Product.objects.create(**validated_data)
+            return product_instance
+        else:
+            raise serializers.ValidationError(category_serializer.errors)
 
 
 class ProductDepotSerializer(serializers.ModelSerializer):

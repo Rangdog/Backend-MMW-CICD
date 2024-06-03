@@ -51,6 +51,9 @@ class Pricelist(models.Model):
     applied_date = models.DateTimeField(auto_now_add=True)
     expired_date = models.DateTimeField(blank=True)
 
+    class Meta:
+        ordering = ['expired_date']
+
 
 class ProductPrice(models.Model):
     pricelist = models.ForeignKey(Pricelist, on_delete=models.CASCADE)
