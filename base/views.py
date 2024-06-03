@@ -224,7 +224,6 @@ class Productviewset(viewsets.ModelViewSet):
             try:
                 with atomic():
                     tmp_category = Category.objects.create(name=category)
-                    ProductDepot.objects.create(name=tmp_category)
                     product.category = tmp_category
                     product.name = name
                     product.unit = unit
