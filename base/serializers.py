@@ -116,6 +116,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'inventory',
             'category',
             'price',
+            'in_stock'
         )
 
     def get_inventory(self, obj):
