@@ -17,6 +17,8 @@ from django.utils.html import strip_tags
 
 
 class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
     serializer_class = CustomEmailSerializer
 
     def post(self, request, *args, **kwargs):
@@ -61,28 +63,14 @@ class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
 
 class CustomResetPasswordConfirmView(APIView):
     permission_classes = [permissions.AllowAny]
+    authentication_classes = []
 
     def post(self, request, *args, **kwargs):
         serializer = CustomResetPasswordConfirmSerializer(data=request.data)
         if serializer.is_valid():
-            # serializer.save()
             return Response({'status': 'OK'})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-# class DepotMixinView(mixins.ListModelMixin, mixins.RetrieveModelMixin, generics.GenericAPIView):
-#     # security
-#     # authentication_classes = [TokenAuthentication]
-#     # permission_classes = [IsAuthenticated]
-#     queryset = Depot.objects.all()
-#     serializer_class = DepotSerializer
-#     lookup_field = 'pk'
-
-#     def get(self, request, *args, **kwargs):
-#         pk = kwargs.get('pk')
-#         if pk is not None:
-#             return self.retrieve(request, *args, **kwargs)
-#         return self.list(request, *args, **kwargs)
 
 class Depotviewset(viewsets.ModelViewSet):
     queryset = Depot.objects.all()
