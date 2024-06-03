@@ -114,8 +114,8 @@ class Profileviewset(viewsets.ModelViewSet):
         except ValidationError:
             return Response({'error': 'Invalid email address'}, status=status.HTTP_400_BAD_REQUEST)
         phone = data.get('phone', '')
-        is_active = data.get('is_active', False)
-        is_superuser = data.get('is_superuser', False)
+        is_active = bool(data.get('is_active', False))
+        is_superuser = bool(data.get('is_active', False))
         depot_user = Profile.objects.filter(user=request.user).first().depot
         try:
             with transaction.atomic():
