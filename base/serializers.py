@@ -54,9 +54,29 @@ class DepotSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    is_active = serializers.SerializerMethodField(read_only=True)
+    is_superuser = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Profile
-        fields = '__all__'
+        fields = (
+            'id',
+            'first_name',
+            'last_name',
+            'gender',
+            'birthdate',
+            'address',
+            'email',
+            'phone',
+            'is_active',
+            'is_superuser',
+        )
+
+    def get_is_active(self, obj):
+        return obj.user.is_active
+
+    def get_is_superuser(self, obj):
+        return obj.user.is_superuser
 
 
 class BusinessPartnerSerializer(serializers.ModelSerializer):
@@ -66,6 +86,7 @@ class BusinessPartnerSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Category
         fields = '__all__'
