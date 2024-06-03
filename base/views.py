@@ -185,12 +185,13 @@ class Productviewset(viewsets.ModelViewSet):
         name = data.get('name', "")
         unit = data.get('unit', "")
         category = data.get('category', None)
+        in_stock = bool(data.get('in_stock', False))
         if isinstance(category, str):
             try:
                 with atomic():
                     tmp_category = Category.objects.create(name=category)
                     Product.objects.create(
-                        category=tmp_category, name=name, unit=unit)
+                        category=tmp_category, name=name, unit=unit, in_stock=in_stock)
                     return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
@@ -200,7 +201,7 @@ class Productviewset(viewsets.ModelViewSet):
                 with atomic():
                     tmp_category = Category.objects.get(pk=category.get('id'))
                     Product.objects.create(
-                        category=tmp_category, name=name, unit=unit)
+                        category=tmp_category, name=name, unit=unit, in_stock=in_stock)
                     return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
@@ -213,6 +214,7 @@ class Productviewset(viewsets.ModelViewSet):
         category = data.get('category', None)
         pk = kwargs.get('pk')
         product = Product.objects.get(pk=pk)
+        in_stock = bool(data.get('in_stock', False))
         if isinstance(category, str):
             try:
                 with atomic():
@@ -220,6 +222,7 @@ class Productviewset(viewsets.ModelViewSet):
                     product.category = tmp_category
                     product.name = name
                     product.unit = unit
+                    product.in_stock = in_stock
                     product.save()
                     return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
@@ -232,6 +235,7 @@ class Productviewset(viewsets.ModelViewSet):
                     product.category = tmp_category
                     product.name = name
                     product.unit = unit
+                    product.in_stock = in_stock
                     product.save()
                     return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
