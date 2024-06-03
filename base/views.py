@@ -191,20 +191,20 @@ class Productviewset(viewsets.ModelViewSet):
                     tmp_category = Category.objects.create(name=category)
                     Product.objects.create(
                         category=tmp_category, name=name, unit=unit)
-                    Response("Thành công", status=status.HTTP_201_CREATED)
+                    return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
-            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
                 with atomic():
                     tmp_category = Category.objects.get(pk=category.get('id'))
                     Product.objects.create(
                         category=tmp_category, name=name, unit=unit)
-                    Response("Thành công", status=status.HTTP_201_CREATED)
+                    return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
-            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         data = request.data
@@ -221,7 +221,7 @@ class Productviewset(viewsets.ModelViewSet):
                     product.name = name
                     product.unit = unit
                     product.save()
-                    Response("Thành công", status=status.HTTP_201_CREATED)
+                    return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
                 return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -233,7 +233,7 @@ class Productviewset(viewsets.ModelViewSet):
                     product.name = name
                     product.unit = unit
                     product.save()
-                    Response("Thành công", status=status.HTTP_201_CREATED)
+                    return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
                 return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
