@@ -42,6 +42,11 @@ class CustomResetPasswordConfirmSerializer(serializers.Serializer):
         return attrs
 
 
+class CustomRepalcePasswordConfirmSerializer(serializers.Serializer):
+    old_password = serializers.CharField()
+    new_password = serializers.CharField()
+
+
 class DepotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Depot

@@ -31,7 +31,6 @@ class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
             user = user_profile.user
             # Tạo token reset password
             token = ResetPasswordToken.objects.create(user=user)
-            print(token.key)
             # Gửi email reset password (implement email sending here)
             # send_password_reset_email(email, token.key)
             sitelink = "http://localhost:5173/"
@@ -69,6 +68,26 @@ class CustomResetPasswordConfirmView(APIView):
         serializer = CustomResetPasswordConfirmSerializer(data=request.data)
         if serializer.is_valid():
             return Response({'status': 'OK'})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ReplacePassword(generics.UpdateAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = CustomRepalcePasswordConfirmSerializer
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Sai mật khẩu cũ"]}, status=status.HTTP_400_BAD_REQUEST)
+
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            return Response({"status": "ok"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

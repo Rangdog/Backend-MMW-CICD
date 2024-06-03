@@ -23,4 +23,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('password_reset/', views.CustomResetPasswordRequestToken.as_view()),
     path('password_reset/confirm/', views.CustomResetPasswordConfirmView.as_view()),
+    path('change_password/', views.ReplacePassword.as_view()),
 ]
