@@ -29,11 +29,11 @@ class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
             user = user_profile.user
             # Tạo token reset password
             token = ResetPasswordToken.objects.create(user=user)
-
+            print(token.key)
             # Gửi email reset password (implement email sending here)
             # send_password_reset_email(email, token.key)
             sitelink = "http://localhost:5173/"
-            full_link = str(sitelink)+str("password-reset/")+str(token)
+            full_link = str(sitelink)+str("password-reset/")+str(token.key)
 
             context = {
                 'full_link': full_link,
@@ -60,10 +60,12 @@ class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
 
 
 class CustomResetPasswordConfirmView(APIView):
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request, *args, **kwargs):
         serializer = CustomResetPasswordConfirmSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            # serializer.save()
             return Response({'status': 'OK'})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

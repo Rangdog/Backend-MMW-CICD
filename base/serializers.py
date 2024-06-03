@@ -23,7 +23,6 @@ class CustomResetPasswordConfirmSerializer(serializers.Serializer):
     def validate(self, attrs):
         token = attrs.get('token')
         password = attrs.get('password')
-
         try:
             reset_password_token = ResetPasswordToken.objects.get(key=token)
         except ResetPasswordToken.DoesNotExist:
