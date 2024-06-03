@@ -15,7 +15,7 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.core.validators import validate_email
 from django.utils.html import strip_tags
-from django.db import transaction
+from django.db.transaction import atomic, set_rollback
 
 
 class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
@@ -101,6 +101,7 @@ class Profileviewset(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
+    @atomic
     def create(self, request, *args, **kwargs):
         data = request.data
         first_name = data.get('first_name', "")
@@ -118,16 +119,51 @@ class Profileviewset(viewsets.ModelViewSet):
         is_superuser = bool(data.get('is_active', False))
         depot_user = request.user.profile.depot
         try:
-            with transaction.atomic():
-                profile = Profile.objects.create(user=None, depot=depot_user, first_name=first_name, last_name=last_name,
-                                                 email=email, phone=phone, birthdate=birthdate, address=address, gender=gender)
-                custom_user = CustomUser.objects.create(username=first_name+last_name + "_" + str(profile.id),
-                                                        password=first_name + last_name, is_active=is_active, is_superuser=is_superuser)
+            profile = Profile.objects.create(user=None, depot=depot_user, first_name=first_name, last_name=last_name,
+                                             email=email, phone=phone, birthdate=birthdate, address=address, gender=gender)
+            custom_user = CustomUser.objects.create(username=first_name+last_name + "_" + str(profile.id),
+                                                    password=first_name + last_name, is_active=is_active, is_superuser=is_superuser)
         except Exception as e:
+            set_rollback(True)
             return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
         profile.user = custom_user
         profile.save()
         return Response(status=status.HTTP_201_CREATED)
+
+    @atomic
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        first_name = data.get('first_name', "")
+        last_name = data.get('last_name', "")
+        gender = bool(data.get('gender', False))
+        birthdate = data.get('birthdate', "")
+        address = data.get('address', '')
+        email = data.get('email', '')
+        try:
+            validate_email(email)
+        except ValidationError:
+            return Response({'error': 'Invalid email address'}, status=status.HTTP_400_BAD_REQUEST)
+        phone = data.get('phone', '')
+        is_active = bool(data.get('is_active', False))
+        is_superuser = bool(data.get('is_active', False))
+        pk = kwargs.get('pk')
+        profile = Profile.objects.filter(pk=pk).first()
+        user = profile.user
+        try:
+            profile.first_name = first_name
+            profile.last_name = last_name
+            profile.gender = gender
+            profile.birthdate = birthdate
+            profile.address = address
+            profile.phone = phone
+            user.is_active = is_active
+            user.is_superuser = is_superuser
+            profile.save()
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+        except Exception as e:
+            set_rollback(True)
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BusinessPartnerviewset(viewsets.ModelViewSet):
