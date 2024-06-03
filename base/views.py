@@ -186,12 +186,15 @@ class Productviewset(viewsets.ModelViewSet):
         unit = data.get('unit', "")
         category = data.get('category', None)
         in_stock = bool(data.get('in_stock', False))
+        inventory = data.get('inventory', 0)
         if isinstance(category, str):
             try:
                 with atomic():
                     tmp_category = Category.objects.create(name=category)
-                    Product.objects.create(
+                    product = Product.objects.create(
                         category=tmp_category, name=name, unit=unit, in_stock=in_stock)
+                    ProductDepot.objects.create(
+                        product=product, inventory=inventory, depot=request.user.profile.depot)
                     return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
@@ -200,8 +203,10 @@ class Productviewset(viewsets.ModelViewSet):
             try:
                 with atomic():
                     tmp_category = Category.objects.get(pk=category.get('id'))
-                    Product.objects.create(
+                    product = Product.objects.create(
                         category=tmp_category, name=name, unit=unit, in_stock=in_stock)
+                    ProductDepot.objects.create(
+                        product=product, inventory=inventory, depot=request.user.profile.depot)
                     return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
@@ -219,6 +224,7 @@ class Productviewset(viewsets.ModelViewSet):
             try:
                 with atomic():
                     tmp_category = Category.objects.create(name=category)
+                    ProductDepot.objects.create(name=tmp_category)
                     product.category = tmp_category
                     product.name = name
                     product.unit = unit
