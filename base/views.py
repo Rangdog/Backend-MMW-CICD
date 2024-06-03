@@ -56,7 +56,7 @@ class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
 
             return Response({'status': 'OK'})
         else:
-            return Response({'status': 'Lỗi, Vui lòng kiểm tra lại user và email'})
+            return Response({'status': 'Lỗi, Vui lòng kiểm tra lại user và email'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CustomResetPasswordConfirmView(APIView):
