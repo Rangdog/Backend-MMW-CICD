@@ -31,7 +31,8 @@ class LoginAPIView(generics.CreateAPIView):
                 return Response(
                     {
                         "profile_id": profile_id,
-                        "token": token
+                        "token": token,
+                        "is_superuser": user.is_superuser,
                     }
                 )
             else:
