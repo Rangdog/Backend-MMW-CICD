@@ -224,7 +224,7 @@ class Productviewset(viewsets.ModelViewSet):
                     Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
-            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
                 with atomic():
@@ -236,7 +236,7 @@ class Productviewset(viewsets.ModelViewSet):
                     Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
-            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProductDepotviewset(viewsets.ModelViewSet):
