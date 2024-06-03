@@ -43,7 +43,6 @@ class CustomResetPasswordConfirmSerializer(serializers.Serializer):
 
 
 class CustomRepalcePasswordConfirmSerializer(serializers.Serializer):
-    old_password = serializers.CharField()
     new_password = serializers.CharField()
 
 
