@@ -13,7 +13,9 @@ from django_rest_passwordreset.models import ResetPasswordToken
 from .models import *
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
+from django.core.validators import validate_email
 from django.utils.html import strip_tags
+from django.db import transaction
 
 
 class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
@@ -98,6 +100,34 @@ class Depotviewset(viewsets.ModelViewSet):
 class Profileviewset(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        first_name = data.get('first_name', "")
+        last_name = data.get('last_name', "")
+        gender = bool(data.get('gender', False))
+        birthdate = data.get('birthdate', "")
+        address = data.get('address', '')
+        email = data.get('email', '')
+        try:
+            validate_email(email)
+        except ValidationError:
+            return Response({'error': 'Invalid email address'}, status=status.HTTP_400_BAD_REQUEST)
+        phone = data.get('phone', '')
+        is_active = data.get('is_active', False)
+        is_superuser = data.get('is_superuser', False)
+        depot_user = Profile.objects.filter(user=request.user).first().depot
+        try:
+            with transaction.atomic():
+                profile = Profile.objects.create(user=None, depot=depot_user, first_name=first_name, last_name=last_name,
+                                                 email=email, phone=phone, birthdate=birthdate, address=address, gender=gender)
+                custom_user = CustomUser.objects.create(username=first_name+last_name + "_" + str(profile.id),
+                                                        password=first_name + last_name, is_active=is_active, is_superuser=is_superuser)
+        except Exception as e:
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+        profile.user = custom_user
+        profile.save()
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class BusinessPartnerviewset(viewsets.ModelViewSet):
