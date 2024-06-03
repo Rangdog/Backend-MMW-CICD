@@ -116,7 +116,7 @@ class Profileviewset(viewsets.ModelViewSet):
         phone = data.get('phone', '')
         is_active = bool(data.get('is_active', False))
         is_superuser = bool(data.get('is_active', False))
-        depot_user = Profile.objects.filter(user=request.user).first().depot
+        depot_user = request.user.profile.depot
         try:
             with transaction.atomic():
                 profile = Profile.objects.create(user=None, depot=depot_user, first_name=first_name, last_name=last_name,

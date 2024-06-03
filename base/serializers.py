@@ -73,10 +73,14 @@ class ProfileSerializer(serializers.ModelSerializer):
         )
 
     def get_is_active(self, obj):
-        return obj.user.is_active
+        if obj.user:
+            return obj.user.is_active
+        return False
 
     def get_is_superuser(self, obj):
-        return obj.user.is_superuser
+        if obj.user:
+            return obj.user.is_superuser
+        return False
 
 
 class BusinessPartnerSerializer(serializers.ModelSerializer):
