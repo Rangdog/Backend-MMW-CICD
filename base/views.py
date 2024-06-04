@@ -298,53 +298,54 @@ class OrderFormviewset(viewsets.ModelViewSet):
             set_rollback(True)
             return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # @atomic
-    # def update(self, request, *args, **kwargs):
-    #     data = request.data
-    #     created_date = data.get('created_date', None)
-    #     if created_date:
-    #         try:
-    #             created_date = datetime.strptime(
-    #                 created_date, '%d/%m/%Y')
-    #             # Assuming 'YourModel' has a 'created_date' DateTimeField
-    #         except ValueError as e:
-    #             return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
-    #     else:
-    #         return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
-    #     depot = data.get('depot', None)
-    #     details = data.get('details', None)
-    #     partner = data.get('partner', None)
-    #     total = data.get('total', None)
-    #     pk = kwargs.get('pk')
-    #     try:
-    #         tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
-    #         tmp_depot = Depot.objects.get(pk=depot.get('id'))
-    #         order_form = OrderForm.objects.get(pk=pk)
-    #         order_form.partner = tmp_partner
-    #         order_form.user = request.user
-    #         order_form.depot = tmp_depot
-    #         order_form.created_date = created_date
-    #         order_form.total = total
-    #         for index_orderdetail in details:
-    #             orderDetail = OrderDetail.objects.get(
-    #                 pk=int(index_orderdetail.get('id')))
-    #             orderDetail
-    #             tmp_product = Product.objects.get(
-    #                 pk=int((orderdetail.get('product')).get('id')))
-
-    #             OrderDetail.objects.create(form=order_form, product=tmp_product, price=float(orderdetail.get(
-    #                 'price')), quantity=int(orderdetail.get('quantity')))
-    #         return Response("Thành công", status=status.HTTP_200_OK)
-    #     except Exception as e:
-    #         set_rollback(True)
-    #         return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+    @atomic
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        created_date = data.get('created_date', None)
+        if created_date:
+            try:
+                created_date = datetime.strptime(
+                    created_date, '%d/%m/%Y')
+                # Assuming 'YourModel' has a 'created_date' DateTimeField
+            except ValueError as e:
+                return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
+        depot = data.get('depot', None)
+        details = data.get('details', None)
+        partner = data.get('partner', None)
+        total = data.get('total', None)
+        pk = kwargs.get('pk')
+        try:
+            tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
+            tmp_depot = Depot.objects.get(pk=depot.get('id'))
+            OrderForm.objects.filter(pk=pk).update(partner=tmp_partner, user=request.user,
+                                                   depot=tmp_depot, created_date=created_date, total=total)
+            order_form = OrderForm.objects.get(pk=pk)
+            for orderdetail in details:
+                tmp_product = Product.objects.get(
+                    pk=int((orderdetail.get('product')).get('id')))
+                tmp_orderdetail = OrderDetail.objects.get(
+                    pk=orderdetail.get('id'))
+                tmp_orderdetail.form = order_form
+                tmp_orderdetail.product = tmp_product
+                tmp_orderdetail.price = float(orderdetail.get(
+                    'price'))
+                print(5)
+                tmp_orderdetail.quantity = int(orderdetail.get('quantity'))
+                print(6)
+                tmp_orderdetail.save()
+            return Response("Thành công", status=status.HTTP_200_OK)
+        except Exception as e:
+            set_rollback(True)
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderDetailviewset(viewsets.ModelViewSet):
     queryset = OrderDetail.objects.all()
     serializer_class = OrderDetailSerializer
 
-    @action(methods=['get'], detail=True, url_path='filter_detail')
+    @ action(methods=['get'], detail=True, url_path='filter_detail')
     def filter_detail(self, request, pk=None):
         order_details = OrderDetail.objects.filter(form__id=pk)
         if order_details.exists():
@@ -363,7 +364,7 @@ class ImportDetailviewset(viewsets.ModelViewSet):
     queryset = ImportDetail.objects.all()
     serializer_class = ImportDetailSerializer
 
-    @action(methods=['get'], detail=True)
+    @ action(methods=['get'], detail=True)
     def filter_detail(self, request, pk: int):
         importDetail = ImportDetail.objects.filter(form__id=pk)
         if importDetail.exists():
@@ -382,7 +383,7 @@ class ExportDetailviewset(viewsets.ModelViewSet):
     queryset = ExportDetail.objects.all()
     serializer_class = ExportDetailSerializer
 
-    @action(methods=['get'], detail=True)
+    @ action(methods=['get'], detail=True)
     def filter_detail(self, request, pk: int):
         exportDetail = ExportDetail.objects.filter(form__id=pk)
         if exportDetail.exists():
