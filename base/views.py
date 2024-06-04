@@ -301,54 +301,54 @@ class OrderFormviewset(viewsets.ModelViewSet):
     @atomic
     def update(self, request, *args, **kwargs):
         data = request.data
-        created_date = data.get('created_date', None)
-        if created_date:
-            try:
-                created_date = datetime.strptime(
-                    created_date, '%d/%m/%Y')
-                # Assuming 'YourModel' has a 'created_date' DateTimeField
-            except ValueError as e:
-                return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
-        depot = data.get('depot', None)
-        details = data.get('details', None)
-        partner = data.get('partner', None)
-        total = data.get('total', None)
-        pk = kwargs.get('pk')
+        depot = data.get("depot", None)
+        details = data.get("details", None)
+        partner = data.get("partner", None)
+        total = data.get("total", None)
+        pk = kwargs.get("pk")
         try:
-            tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
-            tmp_depot = Depot.objects.get(pk=depot.get('id'))
-            OrderForm.objects.filter(pk=pk).update(partner=tmp_partner, user=request.user,
-                                                   depot=tmp_depot, created_date=created_date, total=total)
+            tmp_partner = BusinessPartner.objects.get(pk=partner.get("id"))
+            tmp_depot = Depot.objects.get(pk=depot.get("id"))
+            OrderForm.objects.filter(pk=pk).update(
+                partner=tmp_partner,
+                user=request.user,
+                depot=tmp_depot,
+                total=total,
+            )
             order_form = OrderForm.objects.get(pk=pk)
             orderdetails = OrderDetail.objects.filter(form=order_form)
-            if orderdetails.exists():
-                for orderdetail in details:
+            # CREATE NEW DETAIL OR UPDATE OLD DETAIL.
+            for detail in details:
+                for orderdetail in orderdetails:
+                    if orderdetail.id == detail["id"]:
+                        orderdetail.quantity = detail["quantity"]
+                        orderdetail.price = detail["price"]
+                        orderdetail.save()
+                        break
+                else:
                     tmp_product = Product.objects.get(
-                        pk=int((orderdetail.get('product')).get('id')))
-                    tmp_orderdetail = OrderDetail.objects.get(
-                        pk=orderdetail.get('id'))
-                    tmp_orderdetail.form = order_form
-                    tmp_orderdetail.product = tmp_product
-                    tmp_orderdetail.price = float(orderdetail.get(
-                        'price'))
-                    tmp_orderdetail.quantity = int(orderdetail.get('quantity'))
-                    tmp_orderdetail.save()
-                    orderdetails = orderdetails.exclude(
-                        pk=orderdetail.get('id'))
-                orderdetails.delete()
-                return Response("Thành công", status=status.HTTP_200_OK)
+                        pk=detail["product"]["id"])
+                    OrderDetail.objects.create(
+                        form=order_form,
+                        product=tmp_product,
+                        quantity=detail["quantity"],
+                        price=detail["price"],
+                    )
+            # DELETE DETAIL.
+            deleted_details = []
+            for orderdetail in orderdetails:
+                for detail in details:
+                    if detail["id"] == orderdetail.id:
+                        break
+                else:
+                    deleted_details.append(orderdetail)
             else:
-                for orderdetail in details:
-                    tmp_product = Product.objects.get(
-                        pk=int((orderdetail.get('product')).get('id')))
-
-                    OrderDetail.objects.create(form=order_form, product=tmp_product, price=float(orderdetail.get(
-                        'price')), quantity=int(orderdetail.get('quantity')))
-                return Response("Thành công", status=status.HTTP_200_OK)
+                for detail in deleted_details:
+                    detail.delete()
+            return Response("Thành công", status=status.HTTP_200_OK)
         except Exception as e:
             set_rollback(True)
+            print(e)
             return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
