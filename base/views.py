@@ -375,11 +375,8 @@ class ImportDetailviewset(viewsets.ModelViewSet):
     @ action(methods=['get'], detail=True)
     def filter_detail(self, request, pk: int):
         importDetail = ImportDetail.objects.filter(form__id=pk)
-        if importDetail.exists():
-            serializer = ImportDetailSerializer(importDetail, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response({'detail': 'Not found.'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ImportDetailSerializer(importDetail, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ExportFormviewset(viewsets.ModelViewSet):
@@ -489,8 +486,5 @@ class ExportDetailviewset(viewsets.ModelViewSet):
     @ action(methods=['get'], detail=True)
     def filter_detail(self, request, pk: int):
         exportDetail = ExportDetail.objects.filter(form__id=pk)
-        if exportDetail.exists():
-            serializer = ExportDetailSerializer(exportDetail, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response({'detail': 'Not found.'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ExportDetailSerializer(exportDetail, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
