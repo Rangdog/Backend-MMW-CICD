@@ -84,6 +84,8 @@ WSGI_APPLICATION = 'webserver.wsgi.application'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    'DATETIME_FORMAT': '%d/%m/%Y',
+    'DATE_FORMAT': '%d/%m/%Y',
 }
 
 # Database
@@ -96,6 +98,9 @@ DATABASES = {
     }
 }
 
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
