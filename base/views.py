@@ -438,37 +438,45 @@ class ExportFormviewset(viewsets.ModelViewSet):
         total = data.get('total', None)
         pk = kwargs.get('pk')
         try:
-            tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
-            tmp_depot = Depot.objects.get(pk=depot.get('id'))
-            ExportForm.objects.filter(pk=pk).update(partner=tmp_partner, user=request.user,
-                                                    depot=tmp_depot, created_date=created_date, total=total)
+            tmp_partner = BusinessPartner.objects.get(pk=partner.get("id"))
+            tmp_depot = Depot.objects.get(pk=depot.get("id"))
+            ExportForm.objects.filter(pk=pk).update(
+                partner=tmp_partner,
+                user=request.user,
+                depot=tmp_depot,
+                total=total,
+            )
             export_form = ExportForm.objects.get(pk=pk)
             exportdetails = ExportDetail.objects.filter(form=export_form)
-            if exportdetails.exists():
-                for exportdetail in details:
+            # CREATE NEW DETAIL OR UPDATE OLD DETAIL.
+            for detail in details:
+                for exportdetail in exportdetails:
+                    if exportdetail.id == detail["id"]:
+                        exportdetail.quantity = detail["quantity"]
+                        exportdetail.price = detail["price"]
+                        exportdetail.save()
+                        break
+                else:
                     tmp_product = Product.objects.get(
-                        pk=int((exportdetail.get('product')).get('id')))
-                    tmp_exportdetail = ExportDetail.objects.get(
-                        pk=exportdetail.get('id'))
-                    tmp_exportdetail.form = export_form
-                    tmp_exportdetail.product = tmp_product
-                    tmp_exportdetail.price = float(exportdetail.get(
-                        'price'))
-                    tmp_exportdetail.quantity = int(
-                        exportdetail.get('quantity'))
-                    tmp_exportdetail.save()
-                    exportdetails = exportdetails.exclude(
-                        pk=exportdetail.get('id'))
-                exportdetails.delete()
-                return Response("Thành công", status=status.HTTP_200_OK)
+                        pk=detail["product"]["id"])
+                    ExportDetail.objects.create(
+                        form=export_form,
+                        product=tmp_product,
+                        quantity=detail["quantity"],
+                        price=detail["price"],
+                    )
+            # DELETE DETAIL.
+            deleted_details = []
+            for exportdetail in exportdetails:
+                for detail in details:
+                    if detail["id"] == exportdetail.id:
+                        break
+                else:
+                    deleted_details.append(exportdetail)
             else:
-                for exportdetail in details:
-                    tmp_product = Product.objects.get(
-                        pk=int((exportdetail.get('product')).get('id')))
-
-                    ExportDetail.objects.create(form=export_form, product=tmp_product, price=float(exportdetail.get(
-                        'price')), quantity=int(exportdetail.get('quantity')))
-                return Response("Thành công", status=status.HTTP_200_OK)
+                for detail in deleted_details:
+                    detail.delete()
+            return Response("Thành công", status=status.HTTP_200_OK)
         except Exception as e:
             set_rollback(True)
             return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
