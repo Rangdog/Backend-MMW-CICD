@@ -16,8 +16,8 @@ router.register(r'order_form', OrderFormviewset)
 router.register(r'order_detail', OrderDetailviewset)
 router.register(r'import_form', ImportFormviewset)
 router.register(r'import_detail', ImportDetailviewset)
-router.register(r'export_form', Export_Form_viewset)
-router.register(r'export_detail', Export_Detail_viewset)
+router.register(r'export_form', ExportFormviewset)
+router.register(r'export_detail', ExportDetailviewset)
 
 urlpatterns = [
     path('', include(router.urls)),

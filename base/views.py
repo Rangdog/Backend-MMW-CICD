@@ -279,7 +279,7 @@ class OrderDetailviewset(viewsets.ModelViewSet):
             serializer = OrderDetailSerializer(order_details, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Not found.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ImportFormviewset(viewsets.ModelViewSet):
@@ -291,12 +291,30 @@ class ImportDetailviewset(viewsets.ModelViewSet):
     queryset = ImportDetail.objects.all()
     serializer_class = ImportDetailSerializer
 
+    @action(methods=['get'], detail=True)
+    def filter_detail(self, request, pk: int):
+        importDetail = ImportDetail.objects.filter(form__id=pk)
+        if importDetail.exists():
+            serializer = ImportDetailSerializer(importDetail, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_400_BAD_REQUEST)
 
-class Export_Form_viewset(viewsets.ModelViewSet):
+
+class ExportFormviewset(viewsets.ModelViewSet):
     queryset = ExportForm.objects.all()
     serializer_class = ExportFormSerializer
 
 
-class Export_Detail_viewset(viewsets.ModelViewSet):
+class ExportDetailviewset(viewsets.ModelViewSet):
     queryset = ExportDetail.objects.all()
     serializer_class = ExportDetailSerializer
+
+    @action(methods=['get'], detail=True)
+    def filter_detail(self, request, pk: int):
+        exportDetail = ExportDetail.objects.filter(form__id=pk)
+        if exportDetail.exists():
+            serializer = ExportDetailSerializer(exportDetail, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_400_BAD_REQUEST)
