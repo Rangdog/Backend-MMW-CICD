@@ -105,6 +105,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     inventory = serializers.SerializerMethodField(read_only=True)
+    in_stock = serializers.SerializerMethodField(read_only=True)
     price = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -121,7 +122,9 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_inventory(self, obj):
         # Lấy inventory từ Product_Depot
-        product_depot = ProductDepot.objects.filter(product=obj).first()
+        depot = self.context['request'].user.profile.depot
+        product_depot = ProductDepot.objects.filter(
+            product=obj, depot=depot).first()
         return product_depot.inventory if product_depot else None
 
     def get_price(self, obj):
@@ -130,17 +133,9 @@ class ProductSerializer(serializers.ModelSerializer):
             product=obj, pricelist=Pricelist.objects.last()).first()
         return product_price.price if product_price else 0
 
-    def create(self, validated_data):
-        category_data = validated_data.pop('category')
-        category_serializer = CategorySerializer(data=category_data)
-
-        if category_serializer.validate():
-            category_instance = category_serializer.save()
-            validated_data['category'] = category_instance
-            product_instance = Product.objects.create(**validated_data)
-            return product_instance
-        else:
-            raise serializers.ValidationError(category_serializer.errors)
+    def get_in_stock(self, obj):
+        depot = self.context['request'].user.profile.depot
+        return ProductDepot.objects.filter(product=obj, depot=depot).first().in_stock if ProductDepot.objects.filter(product=obj, depot=depot).first() else None
 
 
 class ProductDepotSerializer(serializers.ModelSerializer):

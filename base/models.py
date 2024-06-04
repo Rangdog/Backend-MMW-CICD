@@ -38,13 +38,13 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     unit = models.CharField(max_length=50)
-    in_stock = models.BooleanField(default=False)
 
 
 class ProductDepot(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     depot = models.ForeignKey(Depot, on_delete=models.CASCADE)
     inventory = models.IntegerField()
+    in_stock = models.BooleanField(default=False)
 
 
 class Pricelist(models.Model):
