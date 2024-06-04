@@ -396,6 +396,47 @@ class ImportFormviewset(viewsets.ModelViewSet):
             set_rollback(True)
             return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
+    @atomic
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        details = data.get("details", None)
+        total = data.get("total", None)
+        pk = kwargs.get("pk")
+        try:
+            ImportForm.objects.filter(pk=pk).update(total=total)
+            import_form = ImportForm.objects.get(pk=pk)
+            old_details = ImportDetail.objects.filter(form=import_form)
+            # CREATE NEW DETAIL OR UPDATE OLD DETAIL.
+            for detail in details:
+                for old_detail in old_details:
+                    if old_detail.order_detail.id == detail["id"]:
+                        old_detail.quantity = detail["quantity"]
+                        old_detail.save()
+                        break
+                else:
+                    tmp_detail = OrderDetail.objects.get(pk=detail["id"])
+                    ImportDetail.objects.create(
+                        form=import_form,
+                        order_detail=tmp_detail,
+                        quantity=detail["quantity"],
+                    )
+            # DELETE DETAIL.
+            deleted_details = []
+            for old_detail in old_details:
+                for detail in details:
+                    if detail["id"] == old_detail.order_detail.id:
+                        break
+                else:
+                    deleted_details.append(old_detail)
+            else:
+                for detail in deleted_details:
+                    detail.delete()
+            return Response("Thành công", status=status.HTTP_200_OK)
+        except Exception as e:
+            set_rollback(True)
+            print(e)
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ImportDetailviewset(viewsets.ModelViewSet):
     queryset = ImportDetail.objects.all()
