@@ -354,7 +354,7 @@ class OrderDetailviewset(viewsets.ModelViewSet):
             serializer = OrderDetailSerializer(order_details, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response({'detail': 'Not found.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response([], status=status.HTTP_200_OK)
 
 
 class ImportFormviewset(viewsets.ModelViewSet):
