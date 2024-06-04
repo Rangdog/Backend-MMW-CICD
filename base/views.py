@@ -350,11 +350,8 @@ class OrderDetailviewset(viewsets.ModelViewSet):
     @ action(methods=['get'], detail=True, url_path='filter_detail')
     def filter_detail(self, request, pk=None):
         order_details = OrderDetail.objects.filter(form__id=pk)
-        if order_details.exists():
-            serializer = OrderDetailSerializer(order_details, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response([], status=status.HTTP_200_OK)
+        serializer = OrderDetailSerializer(order_details, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ImportFormviewset(viewsets.ModelViewSet):
