@@ -331,9 +331,7 @@ class OrderFormviewset(viewsets.ModelViewSet):
                 tmp_orderdetail.product = tmp_product
                 tmp_orderdetail.price = float(orderdetail.get(
                     'price'))
-                print(5)
                 tmp_orderdetail.quantity = int(orderdetail.get('quantity'))
-                print(6)
                 tmp_orderdetail.save()
             return Response("Thành công", status=status.HTTP_200_OK)
         except Exception as e:
