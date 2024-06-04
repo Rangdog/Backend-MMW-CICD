@@ -444,21 +444,31 @@ class ExportFormviewset(viewsets.ModelViewSet):
                                                     depot=tmp_depot, created_date=created_date, total=total)
             export_form = ExportForm.objects.get(pk=pk)
             exportdetails = ExportDetail.objects.filter(form=export_form)
-            for exportdetail in details:
-                tmp_product = Product.objects.get(
-                    pk=int((exportdetail.get('product')).get('id')))
-                tmp_exportdetail = ExportDetail.objects.get(
-                    pk=exportdetail.get('id'))
-                tmp_exportdetail.form = export_form
-                tmp_exportdetail.product = tmp_product
-                tmp_exportdetail.price = float(exportdetail.get(
-                    'price'))
-                tmp_exportdetail.quantity = int(exportdetail.get('quantity'))
-                tmp_exportdetail.save()
-                exportdetails = exportdetails.exclude(
-                    pk=exportdetail.get('id'))
-            exportdetails.delete()
-            return Response("Thành công", status=status.HTTP_200_OK)
+            if exportdetails.exists():
+                for exportdetail in details:
+                    tmp_product = Product.objects.get(
+                        pk=int((exportdetail.get('product')).get('id')))
+                    tmp_exportdetail = ExportDetail.objects.get(
+                        pk=exportdetail.get('id'))
+                    tmp_exportdetail.form = export_form
+                    tmp_exportdetail.product = tmp_product
+                    tmp_exportdetail.price = float(exportdetail.get(
+                        'price'))
+                    tmp_exportdetail.quantity = int(
+                        exportdetail.get('quantity'))
+                    tmp_exportdetail.save()
+                    exportdetails = exportdetails.exclude(
+                        pk=exportdetail.get('id'))
+                exportdetails.delete()
+                return Response("Thành công", status=status.HTTP_200_OK)
+            else:
+                for exportdetail in details:
+                    tmp_product = Product.objects.get(
+                        pk=int((exportdetail.get('product')).get('id')))
+
+                    ExportDetail.objects.create(form=export_form, product=tmp_product, price=float(exportdetail.get(
+                        'price')), quantity=int(exportdetail.get('quantity')))
+                return Response("Thành công", status=status.HTTP_200_OK)
         except Exception as e:
             set_rollback(True)
             return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
