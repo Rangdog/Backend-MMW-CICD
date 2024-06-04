@@ -17,6 +17,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.validators import validate_email
 from django.utils.html import strip_tags
 from django.db.transaction import atomic, set_rollback
+from datetime import datetime
 
 
 class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
@@ -221,25 +222,23 @@ class Productviewset(viewsets.ModelViewSet):
         product = Product.objects.get(pk=pk)
         if isinstance(category, str):
             try:
-                with atomic():
-                    tmp_category = Category.objects.create(name=category)
-                    product.category = tmp_category
-                    product.name = name
-                    product.unit = unit
-                    product.save()
-                    return Response("Thành công", status=status.HTTP_201_CREATED)
+                tmp_category = Category.objects.create(name=category)
+                product.category = tmp_category
+                product.name = name
+                product.unit = unit
+                product.save()
+                return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
                 return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             try:
-                with atomic():
-                    tmp_category = Category.objects.get(pk=category.get('id'))
-                    product.category = tmp_category
-                    product.name = name
-                    product.unit = unit
-                    product.save()
-                    return Response("Thành công", status=status.HTTP_201_CREATED)
+                tmp_category = Category.objects.get(pk=category.get('id'))
+                product.category = tmp_category
+                product.name = name
+                product.unit = unit
+                product.save()
+                return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
                 return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -264,8 +263,38 @@ class OrderFormviewset(viewsets.ModelViewSet):
     queryset = OrderForm.objects.all()
     serializer_class = OrderFormSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    @atomic
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        created_date = data.get('created_date', None)
+        if created_date:
+            try:
+                created_date = datetime.strptime(
+                    created_date, '%d/%m/%Y')
+                # Assuming 'YourModel' has a 'created_date' DateTimeField
+            except ValueError as e:
+                return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
+        depot = data.get('depot', None)
+        details = data.get('details', None)
+        partner = data.get('partner', None)
+        total = data.get('total', None)
+        try:
+            tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
+            tmp_depot = Depot.objects.get(pk=depot.get('id'))
+            order_form = OrderForm.objects.create(partner=tmp_partner, user=request.user,
+                                                  depot=tmp_depot, created_date=created_date, total=total)
+            for orderdetail in details:
+                tmp_product = Product.objects.get(
+                    pk=int((orderdetail.get('product')).get('id')))
+
+                OrderDetail.objects.create(form=order_form, product=tmp_product, price=float(orderdetail.get(
+                    'price')), quantity=int(orderdetail.get('quantity')))
+                return Response("Thành công", status=status.HTTP_200_OK)
+        except Exception as e:
+            set_rollback(True)
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class OrderDetailviewset(viewsets.ModelViewSet):

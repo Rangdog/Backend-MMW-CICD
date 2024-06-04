@@ -268,7 +268,7 @@ class ExportFormSerializer(serializers.ModelSerializer):
     depot = serializers.SerializerMethodField(read_only=True)
     partner_id = serializers.PrimaryKeyRelatedField(
         queryset=BusinessPartner.objects.all(), source='partner', write_only=True)
-    depot = serializers.PrimaryKeyRelatedField(
+    depot_id = serializers.PrimaryKeyRelatedField(
         queryset=Depot.objects.all(), source='partner', write_only=True)
     pricelist = serializers.PrimaryKeyRelatedField(
         queryset=Pricelist.objects.all(), write_only=True)
