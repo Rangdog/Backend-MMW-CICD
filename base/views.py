@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django_rest_passwordreset.views import ResetPasswordRequestToken
 from .serializers import *
 from rest_framework.views import APIView
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status, mixins, generics, permissions
 from rest_framework.permissions import IsAuthenticated
@@ -263,10 +264,22 @@ class OrderFormviewset(viewsets.ModelViewSet):
     queryset = OrderForm.objects.all()
     serializer_class = OrderFormSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
 class OrderDetailviewset(viewsets.ModelViewSet):
     queryset = OrderDetail.objects.all()
     serializer_class = OrderDetailSerializer
+
+    @action(methods=['get'], detail=True)
+    def filter_detail(self, request, pk: int):
+        order_details = OrderDetail.objects.filter(form__id=pk)
+        if order_details.exists():
+            serializer = OrderDetailSerializer(order_details, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class ImportFormviewset(viewsets.ModelViewSet):
