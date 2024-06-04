@@ -323,21 +323,30 @@ class OrderFormviewset(viewsets.ModelViewSet):
                                                    depot=tmp_depot, created_date=created_date, total=total)
             order_form = OrderForm.objects.get(pk=pk)
             orderdetails = OrderDetail.objects.filter(form=order_form)
-            for orderdetail in details:
-                tmp_product = Product.objects.get(
-                    pk=int((orderdetail.get('product')).get('id')))
-                tmp_orderdetail = OrderDetail.objects.get(
-                    pk=orderdetail.get('id'))
-                tmp_orderdetail.form = order_form
-                tmp_orderdetail.product = tmp_product
-                tmp_orderdetail.price = float(orderdetail.get(
-                    'price'))
-                tmp_orderdetail.quantity = int(orderdetail.get('quantity'))
-                tmp_orderdetail.save()
-                orderdetails = orderdetails.exclude(
-                    pk=orderdetail.get('id'))
-            orderdetails.delete()
-            return Response("Thành công", status=status.HTTP_200_OK)
+            if orderdetails.exists():
+                for orderdetail in details:
+                    tmp_product = Product.objects.get(
+                        pk=int((orderdetail.get('product')).get('id')))
+                    tmp_orderdetail = OrderDetail.objects.get(
+                        pk=orderdetail.get('id'))
+                    tmp_orderdetail.form = order_form
+                    tmp_orderdetail.product = tmp_product
+                    tmp_orderdetail.price = float(orderdetail.get(
+                        'price'))
+                    tmp_orderdetail.quantity = int(orderdetail.get('quantity'))
+                    tmp_orderdetail.save()
+                    orderdetails = orderdetails.exclude(
+                        pk=orderdetail.get('id'))
+                orderdetails.delete()
+                return Response("Thành công", status=status.HTTP_200_OK)
+            else:
+                for orderdetail in details:
+                    tmp_product = Product.objects.get(
+                        pk=int((orderdetail.get('product')).get('id')))
+
+                    OrderDetail.objects.create(form=order_form, product=tmp_product, price=float(orderdetail.get(
+                        'price')), quantity=int(orderdetail.get('quantity')))
+                return Response("Thành công", status=status.HTTP_200_OK)
         except Exception as e:
             set_rollback(True)
             return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
