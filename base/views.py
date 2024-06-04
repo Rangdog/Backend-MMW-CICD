@@ -272,8 +272,8 @@ class OrderDetailviewset(viewsets.ModelViewSet):
     queryset = OrderDetail.objects.all()
     serializer_class = OrderDetailSerializer
 
-    @action(methods=['get'], detail=True)
-    def filter_detail(self, request, pk: int):
+    @action(methods=['get'], detail=True, url_path='filter_detail')
+    def filter_detail(self, request, pk=None):
         order_details = OrderDetail.objects.filter(form__id=pk)
         if order_details.exists():
             serializer = OrderDetailSerializer(order_details, many=True)

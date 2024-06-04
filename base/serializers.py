@@ -200,6 +200,7 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderDetail
         fields = (
+            'id',
             'form',
             'product',
             'product_id',
@@ -243,6 +244,7 @@ class ImportDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ImportDetail
         fields = (
+            'id',
             'form',
             'product',
             'order_detail',
@@ -311,6 +313,7 @@ class ExportDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExportDetail
         fields = (
+            'id',
             'form',
             'product',
             'product_id',
