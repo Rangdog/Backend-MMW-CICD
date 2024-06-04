@@ -367,6 +367,35 @@ class ImportFormviewset(viewsets.ModelViewSet):
     queryset = ImportForm.objects.all()
     serializer_class = ImportFormSerializer
 
+    @atomic
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        created_date = data.get('created_date', None)
+        if created_date:
+            try:
+                created_date = datetime.strptime(
+                    created_date, '%d/%m/%Y')
+                # Assuming 'YourModel' has a 'created_date' DateTimeField
+            except ValueError as e:
+                return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
+        order = data.get('order', None)
+        details = data.get('details', None)
+        total = data.get('total', None)
+        try:
+            order_tmp = OrderForm.objects.get(pk=order["id"])
+            import_form = ImportForm.objects.create(
+                order=order_tmp, user=request.user, created_date=created_date, total=total)
+            for detail in details:
+                order_detail_tmp = OrderDetail.objects.get(pk=detail['id'])
+                ImportDetail.objects.create(
+                    form=import_form, order_detail=order_detail_tmp, quantity=detail["quantity"])
+            return Response("Thành công", status=status.HTTP_200_OK)
+        except Exception as e:
+            set_rollback(True)
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ImportDetailviewset(viewsets.ModelViewSet):
     queryset = ImportDetail.objects.all()
