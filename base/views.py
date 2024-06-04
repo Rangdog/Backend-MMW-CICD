@@ -322,6 +322,7 @@ class OrderFormviewset(viewsets.ModelViewSet):
             OrderForm.objects.filter(pk=pk).update(partner=tmp_partner, user=request.user,
                                                    depot=tmp_depot, created_date=created_date, total=total)
             order_form = OrderForm.objects.get(pk=pk)
+            orderdetails = OrderDetail.objects.filter(form=order_form)
             for orderdetail in details:
                 tmp_product = Product.objects.get(
                     pk=int((orderdetail.get('product')).get('id')))
@@ -333,6 +334,9 @@ class OrderFormviewset(viewsets.ModelViewSet):
                     'price'))
                 tmp_orderdetail.quantity = int(orderdetail.get('quantity'))
                 tmp_orderdetail.save()
+                orderdetails = orderdetails.exclude(
+                    pk=orderdetail.get('id'))
+            orderdetails.delete()
             return Response("Thành công", status=status.HTTP_200_OK)
         except Exception as e:
             set_rollback(True)
@@ -433,6 +437,7 @@ class ExportFormviewset(viewsets.ModelViewSet):
             ExportForm.objects.filter(pk=pk).update(partner=tmp_partner, user=request.user,
                                                     depot=tmp_depot, created_date=created_date, total=total)
             export_form = ExportForm.objects.get(pk=pk)
+            exportdetails = ExportDetail.objects.filter(form=export_form)
             for exportdetail in details:
                 tmp_product = Product.objects.get(
                     pk=int((exportdetail.get('product')).get('id')))
@@ -444,6 +449,9 @@ class ExportFormviewset(viewsets.ModelViewSet):
                     'price'))
                 tmp_exportdetail.quantity = int(exportdetail.get('quantity'))
                 tmp_exportdetail.save()
+                exportdetails = exportdetails.exclude(
+                    pk=exportdetail.get('id'))
+            exportdetails.delete()
             return Response("Thành công", status=status.HTTP_200_OK)
         except Exception as e:
             set_rollback(True)
