@@ -376,6 +376,79 @@ class ExportFormviewset(viewsets.ModelViewSet):
     queryset = ExportForm.objects.all()
     serializer_class = ExportFormSerializer
 
+    @atomic
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        created_date = data.get('created_date', None)
+        if created_date:
+            try:
+                created_date = datetime.strptime(
+                    created_date, '%d/%m/%Y')
+                # Assuming 'YourModel' has a 'created_date' DateTimeField
+            except ValueError as e:
+                return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
+        depot = data.get('depot', None)
+        details = data.get('details', None)
+        partner = data.get('partner', None)
+        total = data.get('total', None)
+        try:
+            tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
+            tmp_depot = Depot.objects.get(pk=depot.get('id'))
+            export_form = ExportForm.objects.create(partner=tmp_partner, user=request.user,
+                                                    depot=tmp_depot, created_date=created_date, total=total, pricelist=Pricelist.objects.last())
+            for exportdetail in details:
+                tmp_product = Product.objects.get(
+                    pk=int((exportdetail.get('product')).get('id')))
+
+                ExportDetail.objects.create(form=export_form, product=tmp_product, price=float(exportdetail.get(
+                    'price')), quantity=int(exportdetail.get('quantity')))
+            return Response("Thành công", status=status.HTTP_200_OK)
+        except Exception as e:
+            set_rollback(True)
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @ atomic
+    def update(self, request, *args, **kwargs):
+        data = request.data
+        created_date = data.get('created_date', None)
+        if created_date:
+            try:
+                created_date = datetime.strptime(
+                    created_date, '%d/%m/%Y')
+                # Assuming 'YourModel' has a 'created_date' DateTimeField
+            except ValueError as e:
+                return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
+        depot = data.get('depot', None)
+        details = data.get('details', None)
+        partner = data.get('partner', None)
+        total = data.get('total', None)
+        pk = kwargs.get('pk')
+        try:
+            tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
+            tmp_depot = Depot.objects.get(pk=depot.get('id'))
+            ExportForm.objects.filter(pk=pk).update(partner=tmp_partner, user=request.user,
+                                                    depot=tmp_depot, created_date=created_date, total=total)
+            export_form = ExportForm.objects.get(pk=pk)
+            for exportdetail in details:
+                tmp_product = Product.objects.get(
+                    pk=int((exportdetail.get('product')).get('id')))
+                tmp_exportdetail = ExportDetail.objects.get(
+                    pk=exportdetail.get('id'))
+                tmp_exportdetail.form = export_form
+                tmp_exportdetail.product = tmp_product
+                tmp_exportdetail.price = float(exportdetail.get(
+                    'price'))
+                tmp_exportdetail.quantity = int(exportdetail.get('quantity'))
+                tmp_exportdetail.save()
+            return Response("Thành công", status=status.HTTP_200_OK)
+        except Exception as e:
+            set_rollback(True)
+            return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ExportDetailviewset(viewsets.ModelViewSet):
     queryset = ExportDetail.objects.all()
