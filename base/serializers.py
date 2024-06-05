@@ -1,6 +1,7 @@
 from django_rest_passwordreset.serializers import EmailSerializer
 from django_rest_passwordreset.models import ResetPasswordToken
 from django.contrib.auth.models import User
+from datetime import datetime
 from rest_framework import serializers
 from .models import *
 from django.core.exceptions import ValidationError
@@ -129,9 +130,12 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_price(self, obj):
         # Lấy price từ ProductPrice
+        current_time = datetime.now()
+        pricelist = Pricelist.objects.filter(
+            applied_date__lte=current_time, expired_date__gte=current_time).last()
         product_price = ProductPrice.objects.filter(
-            product=obj, pricelist=Pricelist.objects.last()).first()
-        return product_price.price if product_price else 0
+            product=obj, pricelist=pricelist).first()
+        return product_price.price if product_price else None
 
     def get_in_stock(self, obj):
         depot = self.context['request'].user.profile.depot

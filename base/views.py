@@ -393,23 +393,13 @@ class ImportFormviewset(viewsets.ModelViewSet):
     @atomic
     def create(self, request, *args, **kwargs):
         data = request.data
-        created_date = data.get('created_date', None)
-        if created_date:
-            try:
-                created_date = datetime.strptime(
-                    created_date, '%d/%m/%Y')
-                # Assuming 'YourModel' has a 'created_date' DateTimeField
-            except ValueError as e:
-                return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
         order = data.get('order', None)
         details = data.get('details', None)
         total = data.get('total', None)
         try:
             order_tmp = OrderForm.objects.get(pk=order["id"])
             import_form = ImportForm.objects.create(
-                order=order_tmp, user=request.user, created_date=created_date, total=total)
+                order=order_tmp, user=request.user, total=total)
             for detail in details:
                 order_detail_tmp = OrderDetail.objects.get(pk=detail['id'])
                 ImportDetail.objects.create(
@@ -485,23 +475,18 @@ class ExportFormviewset(viewsets.ModelViewSet):
     @atomic
     def create(self, request, *args, **kwargs):
         data = request.data
-        created_date = data.get('created_date', None)
-        if created_date:
-            try:
-                created_date = datetime.strptime(
-                    created_date, '%d/%m/%Y')
-                # Assuming 'YourModel' has a 'created_date' DateTimeField
-            except ValueError as e:
-                return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
         details = data.get('details', None)
         partner = data.get('partner', None)
         total = data.get('total', None)
         try:
+            current_time = datetime.now()
+            pricelist = Pricelist.objects.filter(
+                applied_date__lte=current_time, expired_date__gte=current_time).last()
+            if not pricelist:
+                return Response("Hiện không có pricelist nào thỏa mãn", status=status.HTTP_400_BAD_REQUEST)
             tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
             export_form = ExportForm.objects.create(partner=tmp_partner, user=request.user,
-                                                    depot=request.user.profile.depot, created_date=created_date, total=total, pricelist=Pricelist.objects.last())
+                                                    depot=request.user.profile.depot, total=total, pricelist=Pricelist.objects.last())
             for exportdetail in details:
                 tmp_product = Product.objects.get(
                     pk=int((exportdetail.get('product')).get('id')))
@@ -516,16 +501,6 @@ class ExportFormviewset(viewsets.ModelViewSet):
     @ atomic
     def update(self, request, *args, **kwargs):
         data = request.data
-        created_date = data.get('created_date', None)
-        if created_date:
-            try:
-                created_date = datetime.strptime(
-                    created_date, '%d/%m/%Y')
-                # Assuming 'YourModel' has a 'created_date' DateTimeField
-            except ValueError as e:
-                return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
         details = data.get('details', None)
         partner = data.get('partner', None)
         total = data.get('total', None)
@@ -648,9 +623,11 @@ class ExcelFileUploadView(generics.GenericAPIView):
                         ProductPrice.objects.create(
                             product=product, pricelist=pricelist, price=new_price)
                     except Product.DoesNotExist:
-                        Response(f"Sản phẩm với ID {row['ID']} không tồn tại.", status=status.HTTP_200_OK)
+                        Response(
+                            f"Sản phẩm với ID {row['ID']} không tồn tại.", status=status.HTTP_200_OK)
                 else:
-                    Response(f"Giá trị không hợp lệ cho sản phẩm với ID {row['ID']}: {new_price}", status=status.HTTP_200_OK)
+                    Response(
+                        f"Giá trị không hợp lệ cho sản phẩm với ID {row['ID']}: {new_price}", status=status.HTTP_200_OK)
             return Response("Cập nhật OLD_PRICE thành công!", status=status.HTTP_200_OK)
         else:
             return Response("Lỗi", status=status.HTTP_400_BAD_REQUEST)
