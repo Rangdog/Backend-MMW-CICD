@@ -184,8 +184,10 @@ class Productviewset(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Product.objects.all()
+        print(queryset)
         product_ids = ProductDepot.objects.filter(
-            depot=self.request.user.profile.depot).values_list('id', flat=True)
+            depot=self.request.user.profile.depot).values_list('product_id', flat=True)
+        print(product_ids)
         queryset = queryset.filter(id__in=product_ids)
         return queryset
 
