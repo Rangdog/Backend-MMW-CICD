@@ -426,9 +426,9 @@ class ImportFormviewset(viewsets.ModelViewSet):
                 for old_detail in old_details:
                     if old_detail.order_detail.id == detail["id"]:
                         old_detail.quantity = detail["quantity"]
-                        old_detail.save()
                         ProductDepot.objects.filter(depot=old_detail.form.order.depot, product=old_detail.order_detail.product).update(
                             inventory=F('inventory') + detail["quantity"] - old_detail.quantity)
+                        old_detail.save()
                         break
                 else:
                     tmp_detail = OrderDetail.objects.get(pk=detail["id"])
@@ -531,9 +531,9 @@ class ExportFormviewset(viewsets.ModelViewSet):
                     if exportdetail.id == detail["id"]:
                         exportdetail.quantity = detail["quantity"]
                         exportdetail.price = detail["price"]
-                        exportdetail.save()
                         ProductDepot.objects.filter(depot=export_form.depot, product=exportdetail.product).update(
                             inventory=F('inventory') - detail["quantity"] + exportdetail.quantity)
+                        exportdetail.save()
                         break
                 else:
                     tmp_product = Product.objects.get(
