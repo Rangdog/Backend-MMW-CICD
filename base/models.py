@@ -51,6 +51,12 @@ class ProductDepot(models.Model):
     inventory = models.IntegerField()
     in_stock = models.BooleanField(default=False)
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(check=models.Q(
+                inventory__gte=0), name='inventory_non_negative')
+        ]
+
 
 class Pricelist(models.Model):
     applied_date = models.DateTimeField(auto_now_add=True)

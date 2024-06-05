@@ -20,7 +20,7 @@ from django.utils.html import strip_tags
 from django.db.transaction import atomic, set_rollback
 from datetime import datetime, timedelta
 from django.http import FileResponse
-
+from django.db.models import F
 import os
 import pandas as pd
 
@@ -404,6 +404,8 @@ class ImportFormviewset(viewsets.ModelViewSet):
                 order_detail_tmp = OrderDetail.objects.get(pk=detail['id'])
                 ImportDetail.objects.create(
                     form=import_form, order_detail=order_detail_tmp, quantity=detail["quantity"])
+                ProductDepot.objects.filter(depot=order_tmp.depot, product=order_detail_tmp.product).update(
+                    inventory=F('inventory') + detail["quantity"])
             return Response("Thành công", status=status.HTTP_200_OK)
         except Exception as e:
             set_rollback(True)
@@ -423,8 +425,12 @@ class ImportFormviewset(viewsets.ModelViewSet):
             for detail in details:
                 for old_detail in old_details:
                     if old_detail.order_detail.id == detail["id"]:
+                        ProductDepot.objects.filter(depot=old_detail.form.order.depot, product=old_detail.order_detail.product).update(
+                            inventory=F('inventory') - old_detail.quantity)
                         old_detail.quantity = detail["quantity"]
                         old_detail.save()
+                        ProductDepot.objects.filter(depot=old_detail.form.order.depot, product=old_detail.order_detail.product).update(
+                            inventory=F('inventory') + detail["quantity"])
                         break
                 else:
                     tmp_detail = OrderDetail.objects.get(pk=detail["id"])
@@ -433,6 +439,8 @@ class ImportFormviewset(viewsets.ModelViewSet):
                         order_detail=tmp_detail,
                         quantity=detail["quantity"],
                     )
+                    ProductDepot.objects.filter(depot=tmp_detail.form.depot, product=tmp_detail.product).update(
+                        inventory=F('inventory') + detail["quantity"])
             # DELETE DETAIL.
             deleted_details = []
             for old_detail in old_details:
@@ -443,6 +451,8 @@ class ImportFormviewset(viewsets.ModelViewSet):
                     deleted_details.append(old_detail)
             else:
                 for detail in deleted_details:
+                    ProductDepot.objects.filter(depot=detail.form.order.depot, product=detail.order_detail.product).update(
+                        inventory=F('inventory') - detail.quantity)
                     detail.delete()
             return Response("Thành công", status=status.HTTP_200_OK)
         except Exception as e:
@@ -493,6 +503,8 @@ class ExportFormviewset(viewsets.ModelViewSet):
 
                 ExportDetail.objects.create(form=export_form, product=tmp_product, price=float(exportdetail.get(
                     'price')), quantity=int(exportdetail.get('quantity')))
+                ProductDepot.objects.filter(depot=export_form.depot, product=tmp_product).update(
+                    inventory=F('inventory') - exportdetail["quantity"])
             return Response("Thành công", status=status.HTTP_200_OK)
         except Exception as e:
             set_rollback(True)
@@ -519,9 +531,13 @@ class ExportFormviewset(viewsets.ModelViewSet):
             for detail in details:
                 for exportdetail in exportdetails:
                     if exportdetail.id == detail["id"]:
+                        ProductDepot.objects.filter(depot=export_form.depot, product=exportdetail.product).update(
+                            inventory=F('inventory') + exportdetail.quantity)
                         exportdetail.quantity = detail["quantity"]
                         exportdetail.price = detail["price"]
                         exportdetail.save()
+                        ProductDepot.objects.filter(depot=export_form.depot, product=exportdetail.product).update(
+                            inventory=F('inventory') - detail["quantity"])
                         break
                 else:
                     tmp_product = Product.objects.get(
@@ -532,6 +548,8 @@ class ExportFormviewset(viewsets.ModelViewSet):
                         quantity=detail["quantity"],
                         price=detail["price"],
                     )
+                    ProductDepot.objects.filter(depot=export_form.depot, product=tmp_product).update(
+                        inventory=F('inventory') - detail["quantity"])
             # DELETE DETAIL.
             deleted_details = []
             for exportdetail in exportdetails:
@@ -542,6 +560,8 @@ class ExportFormviewset(viewsets.ModelViewSet):
                     deleted_details.append(exportdetail)
             else:
                 for detail in deleted_details:
+                    ProductDepot.objects.filter(depot=detail.form.depot, product=detail.product).update(
+                        inventory=F('inventory') + detail.quantity)
                     detail.delete()
             return Response("Thành công", status=status.HTTP_200_OK)
         except Exception as e:
