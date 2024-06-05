@@ -103,6 +103,11 @@ class Profileviewset(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
+    def get_queryset(self):
+        queryset = Profile.objects.filter(
+            depot=self.request.user.profile.depot)
+        return queryset
+
     @atomic
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -118,13 +123,13 @@ class Profileviewset(viewsets.ModelViewSet):
             return Response({'error': 'Invalid email address'}, status=status.HTTP_400_BAD_REQUEST)
         phone = data.get('phone', '')
         is_active = bool(data.get('is_active', False))
-        is_superuser = bool(data.get('is_active', False))
+        is_superuser = bool(data.get('is_superuser', False))
         depot_user = request.user.profile.depot
         try:
             profile = Profile.objects.create(user=None, depot=depot_user, first_name=first_name, last_name=last_name,
                                              email=email, phone=phone, birthdate=birthdate, address=address, gender=gender)
-            custom_user = CustomUser.objects.create(username=first_name+last_name + "_" + str(profile.id),
-                                                    password=first_name + last_name, is_active=is_active, is_superuser=is_superuser)
+            custom_user = CustomUser.objects.create_user(username=first_name+last_name + "_" + str(profile.id),
+                                                         password=first_name + last_name, is_active=is_active, is_superuser=is_superuser)
         except Exception as e:
             set_rollback(True)
             return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -249,6 +254,8 @@ class Productviewset(viewsets.ModelViewSet):
                 product.name = name
                 product.unit = unit
                 product.save()
+                ProductDepot.objects.filter(
+                    product=product, depot=request.user.profile.depot).update(in_stock=in_stock)
                 return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
@@ -273,8 +280,6 @@ class ProductPriceviewset(viewsets.ModelViewSet):
 class OrderFormviewset(viewsets.ModelViewSet):
     queryset = OrderForm.objects.all()
     serializer_class = OrderFormSerializer
-    # @action(methods=['post'], url_path='filter_detail')
-    # def create_or_update:
 
     @atomic
     def create(self, request, *args, **kwargs):
@@ -378,6 +383,12 @@ class ImportFormviewset(viewsets.ModelViewSet):
     queryset = ImportForm.objects.all()
     serializer_class = ImportFormSerializer
 
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return ExportForm.objects.all()
+        else:
+            return ExportForm.objects.filter(user=self.request.user)
+
     @atomic
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -463,6 +474,12 @@ class ImportDetailviewset(viewsets.ModelViewSet):
 class ExportFormviewset(viewsets.ModelViewSet):
     queryset = ExportForm.objects.all()
     serializer_class = ExportFormSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_superuser:
+            return ExportForm.objects.all()
+        else:
+            return ExportForm.objects.filter(user=self.request.user)
 
     @atomic
     def create(self, request, *args, **kwargs):

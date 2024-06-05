@@ -164,7 +164,7 @@ class OrderFormSerializer(serializers.ModelSerializer):
     depot_id = serializers.PrimaryKeyRelatedField(
         queryset=Depot.objects.all(), source='depot', write_only=True)
     user = serializers.PrimaryKeyRelatedField(
-        queryset=CustomUser.objects.all(), write_only=True)
+        queryset=CustomUser.objects.all())
 
     class Meta:
         model = OrderForm
@@ -221,7 +221,7 @@ class ImportFormSerializer(serializers.ModelSerializer):
     order_id = serializers.PrimaryKeyRelatedField(
         queryset=OrderForm.objects.all(), source='order', write_only=True)
     user = serializers.PrimaryKeyRelatedField(
-        queryset=CustomUser.objects.all(), write_only=True)
+        queryset=CustomUser.objects.all())
 
     class Meta:
         model = ImportForm
@@ -273,7 +273,7 @@ class ExportFormSerializer(serializers.ModelSerializer):
     pricelist = serializers.PrimaryKeyRelatedField(
         queryset=Pricelist.objects.all(), write_only=True)
     user = serializers.PrimaryKeyRelatedField(
-        queryset=CustomUser.objects.all(), write_only=True)
+        queryset=CustomUser.objects.all())
 
     class Meta:
         model = ExportForm
