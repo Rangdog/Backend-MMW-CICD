@@ -128,8 +128,8 @@ class Profileviewset(viewsets.ModelViewSet):
         try:
             profile = Profile.objects.create(user=None, depot=depot_user, first_name=first_name, last_name=last_name,
                                              email=email, phone=phone, birthdate=birthdate, address=address, gender=gender)
-            custom_user = CustomUser.objects.create_user(username=first_name+last_name + "_" + str(profile.id),
-                                                         password=first_name + last_name, is_active=is_active, is_superuser=is_superuser)
+            custom_user = CustomUser.objects.create_user(username=(first_name+last_name + "_" + str(profile.id)).lower(),
+                                                         password=(first_name + last_name).lower(), is_active=is_active, is_superuser=is_superuser)
         except Exception as e:
             set_rollback(True)
             return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -385,9 +385,9 @@ class ImportFormviewset(viewsets.ModelViewSet):
 
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return ExportForm.objects.all()
+            return ImportForm.objects.all()
         else:
-            return ExportForm.objects.filter(user=self.request.user)
+            return ImportForm.objects.filter(user=self.request.user)
 
     @atomic
     def create(self, request, *args, **kwargs):
@@ -494,15 +494,13 @@ class ExportFormviewset(viewsets.ModelViewSet):
                 return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
-        depot = data.get('depot', None)
         details = data.get('details', None)
         partner = data.get('partner', None)
         total = data.get('total', None)
         try:
             tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
-            tmp_depot = Depot.objects.get(pk=depot.get('id'))
             export_form = ExportForm.objects.create(partner=tmp_partner, user=request.user,
-                                                    depot=tmp_depot, created_date=created_date, total=total, pricelist=Pricelist.objects.last())
+                                                    depot=request.user.profile.depot, created_date=created_date, total=total, pricelist=Pricelist.objects.last())
             for exportdetail in details:
                 tmp_product = Product.objects.get(
                     pk=int((exportdetail.get('product')).get('id')))
@@ -527,18 +525,16 @@ class ExportFormviewset(viewsets.ModelViewSet):
                 return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
-        depot = data.get('depot', None)
         details = data.get('details', None)
         partner = data.get('partner', None)
         total = data.get('total', None)
         pk = kwargs.get('pk')
         try:
             tmp_partner = BusinessPartner.objects.get(pk=partner.get("id"))
-            tmp_depot = Depot.objects.get(pk=depot.get("id"))
             ExportForm.objects.filter(pk=pk).update(
                 partner=tmp_partner,
                 user=request.user,
-                depot=tmp_depot,
+                depot=request.user.profile.depot,
                 total=total,
             )
             export_form = ExportForm.objects.get(pk=pk)
