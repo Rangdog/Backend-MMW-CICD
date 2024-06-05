@@ -39,6 +39,11 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     unit = models.CharField(max_length=50)
 
+    def get_price(self):
+        product_price = ProductPrice.objects.filter(
+            product__id=self.id, pricelist=Pricelist.objects.last()).first()
+        return product_price.price if product_price else ""
+
 
 class ProductDepot(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

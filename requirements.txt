@@ -3,3 +3,5 @@ djangorestframework
 django-rest-knox
 django-rest-passwordreset
 django-cors-headers
+pandas
+openpyxl

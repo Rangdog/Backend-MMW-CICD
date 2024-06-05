@@ -19,7 +19,9 @@ from django.utils.html import strip_tags
 from django.db.transaction import atomic, set_rollback
 from datetime import datetime
 from django.http import FileResponse
+
 import os
+import pandas as pd
 
 
 class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
@@ -602,8 +604,18 @@ class GetOrderDontHaveImport(generics.ListAPIView):
 
 class ExcelFileDownloadView(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
-        # Đường dẫn tới file Excel của bạn
-        file_path = 'PRICELIST2024_06_05.xlsx'
+        products = Product.objects.all()
+        data = {
+            'ID': [product.id for product in products],
+            'NAME': [product.name for product in products],
+            'OLD_PRICE': [product.get_price() for product in products],
+            'NEW_PRICE': "",
+        }
+        df = pd.DataFrame(data)
+        current_date = datetime.now().strftime("%Y_%m_%d")
+        file_name = f"PRICELIST{current_date}.xlsx"
+        file_path = os.path.join("pricelist", file_name)
+        df.to_excel(file_path, index=False)
 
         # Kiểm tra nếu file tồn tại
         if not os.path.exists(file_path):
