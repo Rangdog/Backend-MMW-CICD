@@ -600,8 +600,3 @@ class GetOrderDontHaveImport(generics.ListAPIView):
     def get_queryset(self):
         return OrderForm.objects.filter(
             depot=self.request.user.profile.depot, importform__isnull=True)
-    # def get(self, request, *args, **kwargs):
-    #     order_forms = OrderForm.objects.filter(
-    #         depot=request.user.profile.depot, importform__null=True)
-    #     serializer = OrderFormSerializer(order_forms, many=True)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
