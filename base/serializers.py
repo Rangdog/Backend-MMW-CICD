@@ -163,8 +163,7 @@ class OrderFormSerializer(serializers.ModelSerializer):
     depot = serializers.SerializerMethodField(read_only=True)
     depot_id = serializers.PrimaryKeyRelatedField(
         queryset=Depot.objects.all(), source='depot', write_only=True)
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=CustomUser.objects.all())
+    user = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = OrderForm
@@ -189,6 +188,12 @@ class OrderFormSerializer(serializers.ModelSerializer):
         return {
             'id': obj.depot.id,
             'name': obj.depot.name
+        }
+
+    def get_user(self, obj):
+        return {
+            'id': obj.user.id,
+            'profile': ProfileSerializer(obj.user.profile).data,
         }
 
 
@@ -220,8 +225,7 @@ class ImportFormSerializer(serializers.ModelSerializer):
     order = OrderFormSerializer(read_only=True)
     order_id = serializers.PrimaryKeyRelatedField(
         queryset=OrderForm.objects.all(), source='order', write_only=True)
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=CustomUser.objects.all())
+    user = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ImportForm
@@ -233,6 +237,12 @@ class ImportFormSerializer(serializers.ModelSerializer):
             'created_date',
             'total'
         )
+
+    def get_user(self, obj):
+        return {
+            'id': obj.user.id,
+            'profile': ProfileSerializer(obj.user.profile).data,
+        }
 
 
 class ImportDetailSerializer(serializers.ModelSerializer):
@@ -272,8 +282,7 @@ class ExportFormSerializer(serializers.ModelSerializer):
         queryset=Depot.objects.all(), source='partner', write_only=True)
     pricelist = serializers.PrimaryKeyRelatedField(
         queryset=Pricelist.objects.all(), write_only=True)
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=CustomUser.objects.all())
+    user = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ExportForm
@@ -299,6 +308,12 @@ class ExportFormSerializer(serializers.ModelSerializer):
         return {
             'id': obj.depot.id,
             'name': obj.depot.name,
+        }
+
+    def get_user(self, obj):
+        return {
+            'id': obj.user.id,
+            'profile': ProfileSerializer(obj.user.profile).data,
         }
 
 
