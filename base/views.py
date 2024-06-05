@@ -294,15 +294,13 @@ class OrderFormviewset(viewsets.ModelViewSet):
                 return Response(f"Error parsing date: {e}", status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response("No date provided", status=status.HTTP_400_BAD_REQUEST)
-        depot = data.get('depot', None)
         details = data.get('details', None)
         partner = data.get('partner', None)
         total = data.get('total', None)
         try:
             tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
-            tmp_depot = Depot.objects.get(pk=depot.get('id'))
             order_form = OrderForm.objects.create(partner=tmp_partner, user=request.user,
-                                                  depot=tmp_depot, created_date=created_date, total=total)
+                                                  depot=request.user.profile.depot, created_date=created_date, total=total)
             for orderdetail in details:
                 tmp_product = Product.objects.get(
                     pk=int((orderdetail.get('product')).get('id')))
@@ -317,18 +315,16 @@ class OrderFormviewset(viewsets.ModelViewSet):
     @atomic
     def update(self, request, *args, **kwargs):
         data = request.data
-        depot = data.get("depot", None)
         details = data.get("details", None)
         partner = data.get("partner", None)
         total = data.get("total", None)
         pk = kwargs.get("pk")
         try:
             tmp_partner = BusinessPartner.objects.get(pk=partner.get("id"))
-            tmp_depot = Depot.objects.get(pk=depot.get("id"))
             OrderForm.objects.filter(pk=pk).update(
                 partner=tmp_partner,
                 user=request.user,
-                depot=tmp_depot,
+                depot=request.user.profile.depot,
                 total=total,
             )
             order_form = OrderForm.objects.get(pk=pk)
