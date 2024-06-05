@@ -182,6 +182,13 @@ class Productviewset(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        product_ids = ProductDepot.objects.filter(
+            depot=self.request.user.profile.depot).values_list('id', flat=True)
+        queryset = queryset.filter(id__in=product_ids)
+        return queryset
+
     @atomic
     def create(self, request, *args, **kwargs):
         data = request.data
@@ -189,13 +196,14 @@ class Productviewset(viewsets.ModelViewSet):
         unit = data.get('unit', "")
         category = data.get('category', None)
         inventory = data.get('inventory', 0)
+        in_stock = bool(data.get('in_stock', False))
         if isinstance(category, str):
             try:
                 tmp_category = Category.objects.create(name=category)
                 product = Product.objects.create(
                     category=tmp_category, name=name, unit=unit)
                 ProductDepot.objects.create(
-                    product=product, inventory=inventory, depot=request.user.profile.depot)
+                    product=product, inventory=inventory, depot=request.user.profile.depot, in_stock=in_stock)
                 return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
@@ -206,7 +214,7 @@ class Productviewset(viewsets.ModelViewSet):
                 product = Product.objects.create(
                     category=tmp_category, name=name, unit=unit)
                 ProductDepot.objects.create(
-                    product=product, inventory=inventory, depot=request.user.profile.depot)
+                    product=product, inventory=inventory, depot=request.user.profile.depot, in_stock=in_stock)
                 return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
@@ -218,6 +226,7 @@ class Productviewset(viewsets.ModelViewSet):
         name = data.get('name', "")
         unit = data.get('unit', "")
         category = data.get('category', None)
+        in_stock = bool(data.get('in_stock', False))
         pk = kwargs.get('pk')
         product = Product.objects.get(pk=pk)
         if isinstance(category, str):
@@ -227,6 +236,8 @@ class Productviewset(viewsets.ModelViewSet):
                 product.name = name
                 product.unit = unit
                 product.save()
+                ProductDepot.objects.filter(
+                    product=product, depot=request.user.profile.depot).update(in_stock=in_stock)
                 return Response("Thành công", status=status.HTTP_201_CREATED)
             except Exception as e:
                 set_rollback(True)
