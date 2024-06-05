@@ -82,6 +82,7 @@ class OrderForm(models.Model):
     depot = models.ForeignKey(Depot, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=20, decimal_places=2)
+    imported = models.BooleanField(default=False)
 
 
 class commom_infor_detail(models.Model):
