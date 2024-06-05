@@ -342,3 +342,7 @@ class ExportDetailSerializer(serializers.ModelSerializer):
             'name': obj.product.name,
             'unit': obj.product.unit,
         }
+
+
+class FileUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()

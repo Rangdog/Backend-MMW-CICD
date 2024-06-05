@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status, mixins, generics, permissions
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
+from rest_framework.parsers import MultiPartParser, FormParser
 from knox.auth import TokenAuthentication
 from django_rest_passwordreset.models import ResetPasswordToken
 from .models import *
@@ -17,7 +18,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.validators import validate_email
 from django.utils.html import strip_tags
 from django.db.transaction import atomic, set_rollback
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.http import FileResponse
 
 import os
@@ -627,3 +628,23 @@ class ExcelFileDownloadView(generics.GenericAPIView):
             file_handle, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="PRICELIST2024_06_05.xlsx"'
         return response
+
+
+class ExcelFileUploadView(generics.GenericAPIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request, format=None):
+        serializer = FileUploadSerializer(data=request.data)
+        if serializer.is_valid():
+            file_obj = serializer.validated_data['file']
+            df = pd.read_excel(file_obj)
+            print(df)
+            expired_date = datetime.now()+timedelta(days=1)
+            pricelist = Pricelist.objects.create(expired_date=expired_date)
+            for index, row in df.iterrows():
+                product = Product.objects.get(id=row['ID'])
+                ProductPrice.objects.create(
+                    product=product, pricelist=pricelist, price=row['NEW_PRICE'])
+            return Response("Cập nhật OLD_PRICE thành công!", status=status.HTTP_200_OK)
+        else:
+            return Response("Lỗi", status=status.HTTP_400_BAD_REQUEST)
