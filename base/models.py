@@ -65,6 +65,10 @@ class ProductPrice(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=20, decimal_places=2)
 
+    class Meta:
+        unique_together = (('pricelist', 'product'),)
+        db_table = 'ProductPrice'
+
 
 class OrderForm(models.Model):
     partner = models.ForeignKey(BusinessPartner, on_delete=models.CASCADE)
@@ -89,7 +93,7 @@ class OrderDetail(commom_infor_detail):
 
     class Meta:
         unique_together = (('form', 'product'),)
-        db_table = 'Order_Detail'
+        db_table = 'OrderDetail'
 
     def save(self, *args, **kwargs):
         self.id = f"{self.form_id}-{self.product_id}"
@@ -110,7 +114,7 @@ class ImportDetail(commom_infor_detail):
 
     class Meta:
         unique_together = (('form', 'order_detail'),)
-        db_table = 'Import_Detail'
+        db_table = 'ImportDetail'
 
     def save(self, *args, **kwargs):
         self.id = f"{self.form_id}-{self.order_detail_id}"
@@ -133,7 +137,7 @@ class ExportDetail(commom_infor_detail):
 
     class Meta:
         unique_together = (('form', 'product'),)
-        db_table = 'Export_Detail'
+        db_table = 'ExportDetail'
 
     def save(self, *args, **kwargs):
         self.id = f"{self.form_id}-{self.product_id}"
