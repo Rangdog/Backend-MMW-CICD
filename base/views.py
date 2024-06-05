@@ -582,3 +582,30 @@ class ExportDetailviewset(viewsets.ModelViewSet):
         exportDetail = ExportDetail.objects.filter(form__id=pk)
         serializer = ExportDetailSerializer(exportDetail, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GetOrderFromDepotAPIView(generics.ListAPIView):
+    queryset = OrderForm.objects.all()
+    serializer_class = OrderFormSerializer
+
+    def get_queryset(self):
+        return OrderForm.objects.filter(depot=self.request.user.profile.depot)
+
+
+class GetOrderDontHaveImport(generics.ListAPIView):
+    queryset = OrderForm.objects.all()
+    serializer_class = OrderFormSerializer
+
+    def get(self, request, *args, **kwargs):
+        order_forms = OrderForm.objects.filter(
+            depot=request.user.profile.depot)
+        import_forms = ImportForm.objects.all()
+        result = []
+        for order in order_forms:
+            for import_form in import_forms:
+                if order == import_form.order:
+                    break
+            else:
+                result.append(order)
+        serializer = OrderFormSerializer(result, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

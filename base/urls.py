@@ -24,4 +24,6 @@ urlpatterns = [
     path('password_reset/', views.CustomResetPasswordRequestToken.as_view()),
     path('password_reset/confirm/', views.CustomResetPasswordConfirmView.as_view()),
     path('change_password/', views.ReplacePassword.as_view()),
+    path('get_order_from_depot/', views.GetOrderFromDepotAPIView.as_view()),
+    path('get_order_dont_have_import/', views.GetOrderDontHaveImport.as_view()),
 ]
