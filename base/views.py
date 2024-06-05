@@ -638,13 +638,19 @@ class ExcelFileUploadView(generics.GenericAPIView):
         if serializer.is_valid():
             file_obj = serializer.validated_data['file']
             df = pd.read_excel(file_obj)
-            print(df)
             expired_date = datetime.now()+timedelta(days=1)
             pricelist = Pricelist.objects.create(expired_date=expired_date)
             for index, row in df.iterrows():
-                product = Product.objects.get(id=row['ID'])
-                ProductPrice.objects.create(
-                    product=product, pricelist=pricelist, price=row['NEW_PRICE'])
+                new_price = row['NEW_PRICE']
+                if pd.notna(new_price) and isinstance(new_price, (int, float)):
+                    try:
+                        product = Product.objects.get(id=row['ID'])
+                        ProductPrice.objects.create(
+                            product=product, pricelist=pricelist, price=new_price)
+                    except Product.DoesNotExist:
+                        Response(f"Sản phẩm với ID {row['ID']} không tồn tại.", status=status.HTTP_200_OK)
+                else:
+                    Response(f"Giá trị không hợp lệ cho sản phẩm với ID {row['ID']}: {new_price}", status=status.HTTP_200_OK)
             return Response("Cập nhật OLD_PRICE thành công!", status=status.HTTP_200_OK)
         else:
             return Response("Lỗi", status=status.HTTP_400_BAD_REQUEST)
