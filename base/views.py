@@ -18,6 +18,8 @@ from django.core.validators import validate_email
 from django.utils.html import strip_tags
 from django.db.transaction import atomic, set_rollback
 from datetime import datetime
+from django.http import FileResponse
+import os
 
 
 class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
@@ -596,3 +598,20 @@ class GetOrderDontHaveImport(generics.ListAPIView):
     def get_queryset(self):
         return OrderForm.objects.filter(
             depot=self.request.user.profile.depot, importform__isnull=True)
+
+
+class ExcelFileDownloadView(generics.GenericAPIView):
+    def get(self, request, *args, **kwargs):
+        # Đường dẫn tới file Excel của bạn
+        file_path = 'PRICELIST2024_06_05.xlsx'
+
+        # Kiểm tra nếu file tồn tại
+        if not os.path.exists(file_path):
+            return Response({"detail": "File not found."}, status=404)
+
+        # Mở file và tạo FileResponse
+        file_handle = open(file_path, 'rb')
+        response = FileResponse(
+            file_handle, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="PRICELIST2024_06_05.xlsx"'
+        return response
