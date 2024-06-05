@@ -203,8 +203,12 @@ class OrderFormSerializer(serializers.ModelSerializer):
         }
 
     def get_imported(self, obj):
-        if obj.importform__isnull == True:
-            return False
+        if hasattr(obj, 'importform'):
+            # Đối tượng có thuộc tính 'importform'
+            if obj.importform:
+                return False
+            else:
+                return True
         else:
             return True
 
