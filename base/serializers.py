@@ -204,9 +204,9 @@ class OrderFormSerializer(serializers.ModelSerializer):
 
     def get_imported(self, obj):
         if obj.importform__isnull == True:
-            return True
-        else:
             return False
+        else:
+            return True
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):
