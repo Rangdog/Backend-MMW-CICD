@@ -168,6 +168,7 @@ class OrderFormSerializer(serializers.ModelSerializer):
     depot_id = serializers.PrimaryKeyRelatedField(
         queryset=Depot.objects.all(), source='depot', write_only=True)
     user = serializers.SerializerMethodField(read_only=True)
+    imported = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = OrderForm
@@ -180,6 +181,7 @@ class OrderFormSerializer(serializers.ModelSerializer):
             'user',
             'created_date',
             'total',
+            'imported',
         )
 
     def get_partner(self, obj):
@@ -199,6 +201,12 @@ class OrderFormSerializer(serializers.ModelSerializer):
             'id': obj.user.id,
             'profile': ProfileSerializer(obj.user.profile).data,
         }
+
+    def get_imported(self, obj):
+        if obj.importform__isnull == True:
+            return True
+        else:
+            return False
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):
