@@ -206,11 +206,11 @@ class OrderFormSerializer(serializers.ModelSerializer):
         if hasattr(obj, 'importform'):
             # Đối tượng có thuộc tính 'importform'
             if obj.importform:
-                return False
-            else:
                 return True
+            else:
+                return False
         else:
-            return True
+            return False
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):
