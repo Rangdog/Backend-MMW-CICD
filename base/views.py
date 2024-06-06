@@ -23,6 +23,7 @@ from django.http import FileResponse
 from django.db.models import F
 import os
 import pandas as pd
+from unidecode import unidecode
 
 
 class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
@@ -133,8 +134,8 @@ class Profileviewset(viewsets.ModelViewSet):
         try:
             profile = Profile.objects.create(user=None, depot=depot_user, first_name=first_name, last_name=last_name,
                                              email=email, phone=phone, birthdate=birthdate, address=address, gender=gender)
-            custom_user = CustomUser.objects.create_user(username=(first_name+last_name + "_" + str(profile.id)).lower(),
-                                                         password=(first_name + last_name).lower(), is_active=is_active, is_superuser=is_superuser)
+            custom_user = CustomUser.objects.create_user(username=(unidecode(first_name)+unidecode(last_name) + "_" + str(profile.id)).lower(),
+                                                         password=(unidecode(first_name) + unidecode(last_name)).lower(), is_active=is_active, is_superuser=is_superuser)
         except Exception as e:
             set_rollback(True)
             return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -425,9 +426,9 @@ class ImportFormviewset(viewsets.ModelViewSet):
             for detail in details:
                 for old_detail in old_details:
                     if old_detail.order_detail.id == detail["id"]:
-                        old_detail.quantity = detail["quantity"]
                         ProductDepot.objects.filter(depot=old_detail.form.order.depot, product=old_detail.order_detail.product).update(
                             inventory=F('inventory') + detail["quantity"] - old_detail.quantity)
+                        old_detail.quantity = detail["quantity"]
                         old_detail.save()
                         break
                 else:
@@ -529,10 +530,10 @@ class ExportFormviewset(viewsets.ModelViewSet):
             for detail in details:
                 for exportdetail in exportdetails:
                     if exportdetail.id == detail["id"]:
-                        exportdetail.quantity = detail["quantity"]
-                        exportdetail.price = detail["price"]
                         ProductDepot.objects.filter(depot=export_form.depot, product=exportdetail.product).update(
                             inventory=F('inventory') - detail["quantity"] + exportdetail.quantity)
+                        exportdetail.quantity = detail["quantity"]
+                        exportdetail.price = detail["price"]
                         exportdetail.save()
                         break
                 else:
@@ -606,18 +607,19 @@ class ExcelFileDownloadView(generics.GenericAPIView):
         df = pd.DataFrame(data)
         current_date = datetime.now().strftime("%Y_%m_%d")
         file_name = f"PRICELIST{current_date}.xlsx"
-        file_path = os.path.join("pricelist", file_name)
-        df.to_excel(file_path, index=False)
+        df.to_excel(file_name, index=False)
 
         # Kiểm tra nếu file tồn tại
-        if not os.path.exists(file_path):
+        if not os.path.exists(file_name):
             return Response({"detail": "File not found."}, status=404)
 
         # Mở file và tạo FileResponse
-        file_handle = open(file_path, 'rb')
+        file_handle = open(file_name, 'rb')
         response = FileResponse(
             file_handle, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename="PRICELIST2024_06_05.xlsx"'
+        file_handle.close()
+        os.remove(file_name)
         return response
 
 

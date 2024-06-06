@@ -1,5 +1,6 @@
 from django.db import models
 from login.models import *
+from django.db.models.signals import pre_delete
 # Create your models here.
 
 
@@ -35,7 +36,7 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL)
     name = models.CharField(max_length=100)
     unit = models.CharField(max_length=50)
 
@@ -148,3 +149,8 @@ class ExportDetail(commom_infor_detail):
     def save(self, *args, **kwargs):
         self.id = f"{self.form_id}-{self.product_id}"
         super(ExportDetail, self).save(*args, **kwargs)
+
+
+@receiver(pre_delete, sender=Category)
+def pre_delete_category(sender, instance, **kwargs):
+    Product.objects.filter(category=instance).delete()
