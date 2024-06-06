@@ -23,6 +23,8 @@ from django.http import FileResponse
 from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 from decimal import Decimal
 from django.db.models.functions import ExtractMonth
+from django.utils.timezone import now
+
 
 import os
 import pandas as pd
