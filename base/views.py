@@ -29,6 +29,7 @@ from django.utils.timezone import now
 import os
 import pandas as pd
 from unidecode import unidecode
+factory = FormFactory()
 
 
 class CustomResetPasswordRequestToken(ResetPasswordRequestToken):
@@ -314,8 +315,8 @@ class OrderFormviewset(viewsets.ModelViewSet):
         total = data.get('total', None)
         try:
             tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
-            order_form = OrderForm.objects.create(partner=tmp_partner, user=request.user,
-                                                  depot=request.user.profile.depot, created_date=created_date, total=total)
+            order_form = factory.create_form(form_type="order", partner=tmp_partner, user=request.user,
+                                             depot=request.user.profile.depot, created_date=created_date, total=total)
             for orderdetail in details:
                 tmp_product = Product.objects.get(
                     pk=int((orderdetail.get('product')).get('id')))
@@ -408,8 +409,8 @@ class ImportFormviewset(viewsets.ModelViewSet):
         total = data.get('total', None)
         try:
             order_tmp = OrderForm.objects.get(pk=order["id"])
-            import_form = ImportForm.objects.create(
-                order=order_tmp, user=request.user, total=total)
+            import_form = factory.create_form(form_type="import",
+                                              order=order_tmp, user=request.user, total=total)
             for detail in details:
                 order_detail_tmp = OrderDetail.objects.get(pk=detail['id'])
                 ImportDetail.objects.create(
@@ -503,8 +504,8 @@ class ExportFormviewset(viewsets.ModelViewSet):
             if not pricelist:
                 return Response("Hiện không có pricelist nào thỏa mãn", status=status.HTTP_400_BAD_REQUEST)
             tmp_partner = BusinessPartner.objects.get(pk=partner.get('id'))
-            export_form = ExportForm.objects.create(partner=tmp_partner, user=request.user,
-                                                    depot=request.user.profile.depot, total=total, pricelist=Pricelist.objects.last())
+            export_form = factory.create_form(form_type="export", partner=tmp_partner, user=request.user,
+                                              depot=request.user.profile.depot, total=total, pricelist=Pricelist.objects.last())
             for exportdetail in details:
                 tmp_product = Product.objects.get(
                     pk=int((exportdetail.get('product')).get('id')))
