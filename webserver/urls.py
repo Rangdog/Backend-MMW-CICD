@@ -22,4 +22,5 @@ urlpatterns = [
     path('api/web/', include('login.urls')),
     path('logoutall/', knox_views.LogoutAllView.as_view(), name='knox_logoutall'),
     path('api/web/', include('base.urls')),
+    path('api/web/', include('Stats.urls')),
 ]

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'login',
     'base',
     'django_rest_passwordreset',
+    'Stats',
 ]
 
 MIDDLEWARE = [
