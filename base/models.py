@@ -96,7 +96,7 @@ class commom_infor_detail(models.Model):
 
 class OrderDetail(commom_infor_detail):
     form = models.ForeignKey(OrderForm, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
     price = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
@@ -140,7 +140,7 @@ class ExportForm(models.Model):
 
 class ExportDetail(commom_infor_detail):
     form = models.ForeignKey(ExportForm, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
     price = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
