@@ -25,6 +25,11 @@ urlpatterns = [
     path('change_password/', views.ReplacePassword.as_view()),
     path('get_order_from_depot/', views.GetOrderFromDepotAPIView.as_view()),
     path('get_order_dont_have_import/', views.GetOrderDontHaveImport.as_view()),
-    path('download_excel/', ExcelFileDownloadView.as_view()),
-    path('upload_excel/', ExcelFileUploadView.as_view()),
+    path('download_excel/', views.ExcelFileDownloadView.as_view()),
+    path('upload_excel/', views.ExcelFileUploadView.as_view()),
+    path('stats/import_export/', views.StatsImportAndExportView.as_view()),
+    path('stats/top5_export/', views.Top5PopularProductsView.as_view()),
+    path('stats/total_import/', views.TotalImport.as_view()),
+    path('stats/total_export/', views.ToltalExport.as_view()),
+    
 ]
