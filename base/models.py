@@ -1,6 +1,5 @@
 from django.db import models
 from login.models import *
-from django.db.models.signals import pre_delete
 # Create your models here.
 
 
@@ -37,7 +36,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, null=True)
+        Category, on_delete=models.PROTECT)
     name = models.CharField(max_length=100)
     unit = models.CharField(max_length=50)
 
@@ -163,8 +162,3 @@ class FormFactory:
             return ExportForm.objects.create(**kwargs)
         else:
             raise ValueError("Invalid form type")
-
-
-@receiver(pre_delete, sender=Category)
-def pre_delete_category(sender, instance, **kwargs):
-    Product.objects.filter(category=instance).delete()
