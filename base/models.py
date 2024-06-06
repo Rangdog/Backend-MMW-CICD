@@ -152,6 +152,19 @@ class ExportDetail(commom_infor_detail):
         super(ExportDetail, self).save(*args, **kwargs)
 
 
+class FormFactory:
+    @staticmethod
+    def create_form(form_type, **kwargs):
+        if form_type == "order":
+            return OrderForm.objects.create(**kwargs)
+        elif form_type == "import":
+            return ImportForm.objects.create(**kwargs)
+        elif form_type == "export":
+            return ExportForm.objects.create(**kwargs)
+        else:
+            raise ValueError("Invalid form type")
+
+
 @receiver(pre_delete, sender=Category)
 def pre_delete_category(sender, instance, **kwargs):
     Product.objects.filter(category=instance).delete()
