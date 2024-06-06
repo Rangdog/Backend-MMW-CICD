@@ -161,7 +161,7 @@ class Profileviewset(viewsets.ModelViewSet):
             return Response({'error': 'Invalid email address'}, status=status.HTTP_400_BAD_REQUEST)
         phone = data.get('phone', '')
         is_active = bool(data.get('is_active', False))
-        is_superuser = bool(data.get('is_active', False))
+        is_superuser = bool(data.get('is_superuser', False))
         pk = kwargs.get('pk')
         profile = Profile.objects.filter(pk=pk).first()
         user = profile.user
