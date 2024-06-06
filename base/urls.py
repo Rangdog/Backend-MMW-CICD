@@ -27,6 +27,4 @@ urlpatterns = [
     path('get_order_dont_have_import/', views.GetOrderDontHaveImport.as_view()),
     path('download_excel/', views.ExcelFileDownloadView.as_view()),
     path('upload_excel/', views.ExcelFileUploadView.as_view()),
-
-    
 ]

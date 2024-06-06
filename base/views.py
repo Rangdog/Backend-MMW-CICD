@@ -139,8 +139,12 @@ class Profileviewset(viewsets.ModelViewSet):
         try:
             profile = Profile.objects.create(user=None, depot=depot_user, first_name=first_name, last_name=last_name,
                                              email=email, phone=phone, birthdate=birthdate, address=address, gender=gender)
-            custom_user = CustomUser.objects.create_user(username=(unidecode(first_name)+unidecode(last_name) + "_" + str(profile.id)).lower(),
-                                                         password=(unidecode(first_name) + unidecode(last_name)).lower(), is_active=is_active, is_superuser=is_superuser)
+            username_tmp = (unidecode(first_name)+unidecode(last_name) +
+                            "_" + str(profile.id)).lower().replace(" ", "_")
+            password_tmp = (unidecode(first_name) +
+                            unidecode(last_name)).lower().replace(" ", "_")
+            custom_user = CustomUser.objects.create_user(username=username_tmp,
+                                                         password=password_tmp, is_active=is_active, is_superuser=is_superuser)
         except Exception as e:
             set_rollback(True)
             return Response({"lỗi": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
@@ -654,6 +658,3 @@ class ExcelFileUploadView(generics.GenericAPIView):
             return Response("Cập nhật OLD_PRICE thành công!", status=status.HTTP_200_OK)
         else:
             return Response("Lỗi", status=status.HTTP_400_BAD_REQUEST)
-
-
-
