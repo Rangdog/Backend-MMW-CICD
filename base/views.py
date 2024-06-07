@@ -693,8 +693,7 @@ class ExcelFileDownloadView(generics.GenericAPIView):
             "NEW_PRICE": "",
         }
         df = pd.DataFrame(data)
-        current_date = datetime.now().strftime("%Y_%m_%d")
-        file_name = f"PRICELIST{current_date}.xlsx"
+        file_name = "PRICELIST.xlsx"
         df.to_excel(file_name, index=False)
 
         # Kiểm tra nếu file tồn tại
@@ -707,11 +706,7 @@ class ExcelFileDownloadView(generics.GenericAPIView):
             file_handle,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        response["Content-Disposition"] = (
-            'attachment; filename="PRICELIST2024_06_05.xlsx"'
-        )
-        file_handle.close()
-        os.remove(file_name)
+        response["Content-Disposition"] = f'attachment; filename="{file_name}"'
         return response
 
 
