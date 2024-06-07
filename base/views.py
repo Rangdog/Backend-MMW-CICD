@@ -238,7 +238,7 @@ class Productviewset(viewsets.ModelViewSet):
         in_stock = bool(data.get("in_stock", False))
         if isinstance(category, str):
             try:
-                tmp_category = Category.objects.create(name=category)
+                tmp_category = Category.objects.get_or_create(name=category)
                 product = Product.objects.create(
                     category=tmp_category, name=name, unit=unit
                 )
