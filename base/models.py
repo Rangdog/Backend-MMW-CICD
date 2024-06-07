@@ -1,6 +1,5 @@
 from django.db import models
 from login.models import *
-# Create your models here.
 
 
 class Depot(models.Model):
@@ -10,7 +9,8 @@ class Depot(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(
-        CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+        CustomUser, on_delete=models.CASCADE, null=True, blank=True
+    )
     depot = models.ForeignKey(Depot, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -23,7 +23,7 @@ class Profile(models.Model):
 
 class BusinessPartner(models.Model):
     name = models.CharField(max_length=100)
-    gender = models.BooleanField(null=True)
+    gender = models.BooleanField(null=True, blank=True)
     email = models.EmailField(unique=True, max_length=100)
     address = models.CharField(max_length=200)
     company = models.CharField(max_length=100, null=True, blank=True)
@@ -35,36 +35,37 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    category = models.ForeignKey(
-        Category, on_delete=models.PROTECT)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT)
     name = models.CharField(max_length=100)
     unit = models.CharField(max_length=50)
 
     def get_price(self):
         product_price = ProductPrice.objects.filter(
-            product__id=self.id, pricelist=Pricelist.objects.last()).first()
+            product__id=self.id, pricelist=Pricelist.objects.last()
+        ).first()
         return product_price.price if product_price else ""
 
 
 class ProductDepot(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    depot = models.ForeignKey(Depot, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    depot = models.ForeignKey(Depot, on_delete=models.PROTECT)
     inventory = models.IntegerField()
     in_stock = models.BooleanField(default=False)
 
     class Meta:
         constraints = [
-            models.CheckConstraint(check=models.Q(
-                inventory__gte=0), name='inventory_non_negative')
+            models.CheckConstraint(
+                check=models.Q(inventory__gte=0), name="inventory_non_negative"
+            )
         ]
 
 
 class Pricelist(models.Model):
     applied_date = models.DateTimeField(auto_now_add=True)
-    expired_date = models.DateTimeField(blank=True)
+    expired_date = models.DateTimeField()
 
     class Meta:
-        ordering = ['expired_date']
+        ordering = ["expired_date"]
 
 
 class ProductPrice(models.Model):
@@ -73,14 +74,14 @@ class ProductPrice(models.Model):
     price = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
-        unique_together = (('pricelist', 'product'),)
-        db_table = 'ProductPrice'
+        unique_together = (("pricelist", "product"),)
+        db_table = "ProductPrice"
 
 
 class OrderForm(models.Model):
-    partner = models.ForeignKey(BusinessPartner, on_delete=models.CASCADE)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    depot = models.ForeignKey(Depot, on_delete=models.CASCADE)
+    partner = models.ForeignKey(BusinessPartner, on_delete=models.PROTECT)
+    user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    depot = models.ForeignKey(Depot, on_delete=models.PROTECT)
     created_date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=20, decimal_places=2)
 
@@ -99,8 +100,8 @@ class OrderDetail(commom_infor_detail):
     price = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
-        unique_together = (('form', 'product'),)
-        db_table = 'OrderDetail'
+        unique_together = (("form", "product"),)
+        db_table = "OrderDetail"
 
     def save(self, *args, **kwargs):
         self.id = f"{self.form_id}-{self.product_id}"
@@ -108,9 +109,8 @@ class OrderDetail(commom_infor_detail):
 
 
 class ImportForm(models.Model):
-    order = models.OneToOneField(
-        OrderForm, on_delete=models.CASCADE)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    order = models.OneToOneField(OrderForm, on_delete=models.PROTECT)
+    user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
     created_date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=20, decimal_places=2)
 
@@ -120,8 +120,8 @@ class ImportDetail(commom_infor_detail):
     order_detail = models.OneToOneField(OrderDetail, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = (('form', 'order_detail'),)
-        db_table = 'ImportDetail'
+        unique_together = (("form", "order_detail"),)
+        db_table = "ImportDetail"
 
     def save(self, *args, **kwargs):
         self.id = f"{self.form_id}-{self.order_detail_id}"
@@ -129,10 +129,10 @@ class ImportDetail(commom_infor_detail):
 
 
 class ExportForm(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    partner = models.ForeignKey(BusinessPartner, on_delete=models.CASCADE)
-    depot = models.ForeignKey(Depot, on_delete=models.CASCADE)
-    pricelist = models.ForeignKey(Pricelist, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.PROTECT)
+    partner = models.ForeignKey(BusinessPartner, on_delete=models.PROTECT)
+    depot = models.ForeignKey(Depot, on_delete=models.PROTECT)
+    pricelist = models.ForeignKey(Pricelist, on_delete=models.PROTECT)
     created_date = models.DateTimeField(auto_now_add=True)
     total = models.DecimalField(max_digits=20, decimal_places=2)
 
@@ -143,8 +143,8 @@ class ExportDetail(commom_infor_detail):
     price = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
-        unique_together = (('form', 'product'),)
-        db_table = 'ExportDetail'
+        unique_together = (("form", "product"),)
+        db_table = "ExportDetail"
 
     def save(self, *args, **kwargs):
         self.id = f"{self.form_id}-{self.product_id}"
