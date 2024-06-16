@@ -9,10 +9,11 @@ jobs:
         uses: actions/checkout@v2
         with:
           host: 192.168.1.27
-          username: ubuntu
+          username: thanh
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           command_timeout: 200m
           script: |
+            ls
             cd /home/thanh/Desktop/backend/ 
             echo hello world > hello.txt
