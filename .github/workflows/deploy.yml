@@ -23,18 +23,16 @@ jobs:
         run: |
           python manage.py migrate
       - name: Deploy via SSH
-        uses: easingthemes/ssh-deploy@main
-        with:
-          server: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-      - name: Restart Nginx
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SERVER_IP }}
+         host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            sudo systemctl restart nginx
+          cd backend
+          git pull origin main
+          pip install -r requirements.txt
+          python manage.py migrate
+          sudo systemctl restart nginx
+            
