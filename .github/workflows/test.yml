@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create a file
-        uses: actions/checkout@v2
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: 192.168.1.27
           username: thanh
