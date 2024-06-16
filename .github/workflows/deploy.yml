@@ -23,7 +23,7 @@ jobs:
         run: |
           python manage.py migrate
       - name: Deploy via SSH
-        uses: easingthemes/ssh-deploy@v2.0.0
+        uses: easingthemes/ssh-deploy@main
         with:
           server: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
