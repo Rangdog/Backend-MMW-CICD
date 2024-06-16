@@ -8,27 +8,37 @@ class CustomUserAdmin(BaseUserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = CustomUser
-    list_display = ['username', 'is_superuser']
+    list_display = ["username", "is_superuser"]
     fieldsets = (
-        (None, {'fields': ('username', 'password', 'is_active', 'is_superuser')}),
+        (None, {"fields": ("username", "password", "is_active", "is_superuser")}),
     )
     add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2', 'is_active', 'is_superuser'),
-        }),
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": (
+                    "username",
+                    "password1",
+                    "password2",
+                    "is_active",
+                    "is_superuser",
+                ),
+            },
+        ),
     )
-    search_fields = ('username',)
-    ordering = ('username',)
+    search_fields = ("username",)
+    ordering = ("username",)
 
     # Loại bỏ trường is_staff ra khỏi list_filter
-    list_filter = ['is_active', 'is_superuser']
+    list_filter = ["is_active", "is_superuser"]
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
         if not obj:
-            fieldsets[0][1]['fields'] = tuple(
-                field for field in fieldsets[0][1]['fields'] if field != 'is_staff')
+            fieldsets[0][1]["fields"] = tuple(
+                field for field in fieldsets[0][1]["fields"] if field != "is_staff"
+            )
         return fieldsets
 
 

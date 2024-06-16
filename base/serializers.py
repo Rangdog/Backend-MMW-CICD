@@ -1,10 +1,8 @@
-from django_rest_passwordreset.serializers import EmailSerializer
-from django_rest_passwordreset.models import ResetPasswordToken
-from django.contrib.auth.models import User
+from .models import *
 from datetime import datetime
 from rest_framework import serializers
-from .models import *
 from django.core.exceptions import ValidationError
+from django_rest_passwordreset.models import ResetPasswordToken
 
 
 class CustomEmailSerializer(serializers.Serializer):
@@ -13,7 +11,7 @@ class CustomEmailSerializer(serializers.Serializer):
 
     def validate_email(self, value):
         if not Profile.objects.filter(email=value).exists():
-            raise serializers.ValidationError('Email không tồn tại')
+            raise serializers.ValidationError("Email không tồn tại")
         return value
 
 
@@ -22,16 +20,16 @@ class CustomResetPasswordConfirmSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, attrs):
-        token = attrs.get('token')
-        password = attrs.get('password')
+        token = attrs.get("token")
+        password = attrs.get("password")
         try:
             reset_password_token = ResetPasswordToken.objects.get(key=token)
         except ResetPasswordToken.DoesNotExist:
-            raise ValidationError('Token không hợp lệ')
+            raise ValidationError("Token không hợp lệ")
 
         user = reset_password_token.user
         if not user.is_active:
-            raise ValidationError('Tài khoản không hoạt động')
+            raise ValidationError("Tài khoản không hoạt động")
 
         # Đặt lại mật khẩu cho người dùng
         user.set_password(password)
@@ -51,7 +49,7 @@ class CustomRepalcePasswordConfirmSerializer(serializers.Serializer):
 class DepotSerializer(serializers.ModelSerializer):
     class Meta:
         model = Depot
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -61,16 +59,16 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = (
-            'id',
-            'first_name',
-            'last_name',
-            'gender',
-            'birthdate',
-            'address',
-            'email',
-            'phone',
-            'is_active',
-            'is_superuser',
+            "id",
+            "first_name",
+            "last_name",
+            "gender",
+            "birthdate",
+            "address",
+            "email",
+            "phone",
+            "is_active",
+            "is_superuser",
         )
 
     def get_is_active(self, obj):
@@ -87,17 +85,17 @@ class ProfileSerializer(serializers.ModelSerializer):
 class BusinessPartnerSerializer(serializers.ModelSerializer):
     class Meta:
         model = BusinessPartner
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = "__all__"
 
     def validate(self, value):
-        if type(value) == 'dict':
+        if type(value) == "dict":
             return value
         category = Category.objects.create(name=value)
         return CategorySerializer(category).data
@@ -111,99 +109,92 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = (
-            'id',
-            'name',
-            'unit',
-            'inventory',
-            'category',
-            'price',
-            'in_stock'
-        )
+        fields = ("id", "name", "unit", "inventory", "category", "price", "in_stock")
 
     def get_inventory(self, obj):
         # Lấy inventory từ Product_Depot
-        depot = self.context['request'].user.profile.depot
-        product_depot = ProductDepot.objects.filter(
-            product=obj, depot=depot).first()
+        depot = self.context["request"].user.profile.depot
+        product_depot = ProductDepot.objects.filter(product=obj, depot=depot).first()
         return product_depot.inventory if product_depot else None
 
     def get_price(self, obj):
         # Lấy price từ ProductPrice
         current_time = datetime.now()
         pricelist = Pricelist.objects.filter(
-            applied_date__lte=current_time, expired_date__gte=current_time).last()
+            applied_date__lte=current_time, expired_date__gte=current_time
+        ).last()
         product_price = ProductPrice.objects.filter(
-            product=obj, pricelist=pricelist).first()
+            product=obj, pricelist=pricelist
+        ).first()
         return product_price.price if product_price else None
 
     def get_in_stock(self, obj):
-        depot = self.context['request'].user.profile.depot
-        return ProductDepot.objects.filter(product=obj, depot=depot).first().in_stock if ProductDepot.objects.filter(product=obj, depot=depot).first() else None
+        depot = self.context["request"].user.profile.depot
+        return (
+            ProductDepot.objects.filter(product=obj, depot=depot).first().in_stock
+            if ProductDepot.objects.filter(product=obj, depot=depot).first()
+            else None
+        )
 
 
 class ProductDepotSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductDepot
-        fields = '__all__'
+        fields = "__all__"
 
 
 class PricelistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pricelist
-        fields = '__all__'
+        fields = "__all__"
 
 
 class ProductPriceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductPrice
-        fields = '__all__'
+        fields = "__all__"
 
 
 class OrderFormSerializer(serializers.ModelSerializer):
     partner = serializers.SerializerMethodField(read_only=True)
     partner_id = serializers.PrimaryKeyRelatedField(
-        queryset=BusinessPartner.objects.all(), source='partner', write_only=True)
+        queryset=BusinessPartner.objects.all(), source="partner", write_only=True
+    )
     depot = serializers.SerializerMethodField(read_only=True)
     depot_id = serializers.PrimaryKeyRelatedField(
-        queryset=Depot.objects.all(), source='depot', write_only=True)
+        queryset=Depot.objects.all(), source="depot", write_only=True
+    )
     user = serializers.SerializerMethodField(read_only=True)
     imported = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = OrderForm
         fields = (
-            'id',
-            'partner',
-            'partner_id',
-            'depot',
-            'depot_id',
-            'user',
-            'created_date',
-            'total',
-            'imported',
+            "id",
+            "partner",
+            "partner_id",
+            "depot",
+            "depot_id",
+            "user",
+            "created_date",
+            "total",
+            "imported",
         )
 
     def get_partner(self, obj):
-        return {
-            'id': obj.partner.id,
-            'name': obj.partner.name
-        }
+        return {"id": obj.partner.id, "name": obj.partner.name}
 
     def get_depot(self, obj):
-        return {
-            'id': obj.depot.id,
-            'name': obj.depot.name
-        }
+        return {"id": obj.depot.id, "name": obj.depot.name}
 
     def get_user(self, obj):
         return {
-            'id': obj.user.id,
-            'profile': ProfileSerializer(obj.user.profile).data,
+            "id": obj.user.id,
+            "profile": ProfileSerializer(obj.user.profile).data,
         }
 
     def get_imported(self, obj):
-        if hasattr(obj, 'importform'):
+        if hasattr(obj, "importform"):
             # Đối tượng có thuộc tính 'importform'
             if obj.importform:
                 return True
@@ -216,48 +207,43 @@ class OrderFormSerializer(serializers.ModelSerializer):
 class OrderDetailSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField(read_only=True)
     product_id = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(), source='product', write_only=True)
+        queryset=Product.objects.all(), source="product", write_only=True
+    )
 
     class Meta:
         model = OrderDetail
         fields = (
-            'id',
-            'form',
-            'product',
-            'product_id',
-            'quantity',
-            'price',
+            "id",
+            "form",
+            "product",
+            "product_id",
+            "quantity",
+            "price",
         )
 
     def get_product(self, obj):
         return {
-            'id': obj.product.id,
-            'name': obj.product.name,
-            'unit': obj.product.unit,
+            "id": obj.product.id,
+            "name": obj.product.name,
+            "unit": obj.product.unit,
         }
 
 
 class ImportFormSerializer(serializers.ModelSerializer):
     order = OrderFormSerializer(read_only=True)
     order_id = serializers.PrimaryKeyRelatedField(
-        queryset=OrderForm.objects.all(), source='order', write_only=True)
+        queryset=OrderForm.objects.all(), source="order", write_only=True
+    )
     user = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ImportForm
-        fields = (
-            'id',
-            'order',
-            'order_id',
-            'user',
-            'created_date',
-            'total'
-        )
+        fields = ("id", "order", "order_id", "user", "created_date", "total")
 
     def get_user(self, obj):
         return {
-            'id': obj.user.id,
-            'profile': ProfileSerializer(obj.user.profile).data,
+            "id": obj.user.id,
+            "profile": ProfileSerializer(obj.user.profile).data,
         }
 
 
@@ -265,24 +251,25 @@ class ImportDetailSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField(read_only=True)
     price = serializers.SerializerMethodField(read_only=True)
     order_detail = serializers.PrimaryKeyRelatedField(
-        queryset=OrderDetail.objects.all(), write_only=True)
+        queryset=OrderDetail.objects.all(), write_only=True
+    )
 
     class Meta:
         model = ImportDetail
         fields = (
-            'id',
-            'form',
-            'product',
-            'order_detail',
-            'quantity',
-            'price',
+            "id",
+            "form",
+            "product",
+            "order_detail",
+            "quantity",
+            "price",
         )
 
     def get_product(self, obj):
         return {
             "id": obj.order_detail.product.id,
-            'name': obj.order_detail.product.name,
-            'unit': obj.order_detail.product.unit,
+            "name": obj.order_detail.product.name,
+            "unit": obj.order_detail.product.unit,
         }
 
     def get_price(self, obj):
@@ -293,75 +280,77 @@ class ExportFormSerializer(serializers.ModelSerializer):
     partner = serializers.SerializerMethodField(read_only=True)
     depot = serializers.SerializerMethodField(read_only=True)
     partner_id = serializers.PrimaryKeyRelatedField(
-        queryset=BusinessPartner.objects.all(), source='partner', write_only=True)
+        queryset=BusinessPartner.objects.all(), source="partner", write_only=True
+    )
     depot_id = serializers.PrimaryKeyRelatedField(
-        queryset=Depot.objects.all(), source='partner', write_only=True)
+        queryset=Depot.objects.all(), source="partner", write_only=True
+    )
     pricelist = serializers.PrimaryKeyRelatedField(
-        queryset=Pricelist.objects.all(), write_only=True)
+        queryset=Pricelist.objects.all(), write_only=True
+    )
     user = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ExportForm
         fields = (
-            'id',
-            'partner',
-            'partner_id',
-            'depot',
-            'depot_id',
-            'user',
-            'created_date',
-            'pricelist',
-            'total',
+            "id",
+            "partner",
+            "partner_id",
+            "depot",
+            "depot_id",
+            "user",
+            "created_date",
+            "pricelist",
+            "total",
         )
 
     def get_partner(self, obj):
         return {
-            'id': obj.partner.id,
-            'name': obj.partner.name,
+            "id": obj.partner.id,
+            "name": obj.partner.name,
         }
 
     def get_depot(self, obj):
         return {
-            'id': obj.depot.id,
-            'name': obj.depot.name,
+            "id": obj.depot.id,
+            "name": obj.depot.name,
         }
 
     def get_user(self, obj):
         return {
-            'id': obj.user.id,
-            'profile': ProfileSerializer(obj.user.profile).data,
+            "id": obj.user.id,
+            "profile": ProfileSerializer(obj.user.profile).data,
         }
 
 
 class ExportDetailSerializer(serializers.ModelSerializer):
     product = serializers.SerializerMethodField()
     product_id = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(),
-        source='product',
-        write_only=True
+        queryset=Product.objects.all(), source="product", write_only=True
     )
 
     class Meta:
         model = ExportDetail
         fields = (
-            'id',
-            'form',
-            'product',
-            'product_id',
-            'quantity',
-            'price',
+            "id",
+            "form",
+            "product",
+            "product_id",
+            "quantity",
+            "price",
         )
 
     def get_product(self, obj):
         return {
-            'id': obj.product.id,
-            'name': obj.product.name,
-            'unit': obj.product.unit,
+            "id": obj.product.id,
+            "name": obj.product.name,
+            "unit": obj.product.unit,
         }
 
 
 class FileUploadSerializer(serializers.Serializer):
     file = serializers.FileField()
+
 
 class TopProductSerializer(serializers.Serializer):
     id = serializers.IntegerField()
@@ -369,10 +358,12 @@ class TopProductSerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
     value = serializers.IntegerField()
 
+
 class ExportStatisticsSerializer(serializers.Serializer):
     current = serializers.DecimalField(max_digits=20, decimal_places=2)
     increase = serializers.DecimalField(max_digits=20, decimal_places=2)
     percentage = serializers.DecimalField(max_digits=5, decimal_places=2)
+
 
 class ImportStatisticsSerializer(serializers.Serializer):
     current = serializers.DecimalField(max_digits=20, decimal_places=2)

@@ -4,13 +4,14 @@ from .models import CustomUser
 
 
 class CustomUserCreationForm(forms.ModelForm):
-    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
+    password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
     password2 = forms.CharField(
-        label='Password confirmation', widget=forms.PasswordInput)
+        label="Password confirmation", widget=forms.PasswordInput
+    )
 
     class Meta:
         model = CustomUser
-        fields = ('username',)
+        fields = ("username",)
 
     def clean_password2(self):
         # Kiểm tra hai mật khẩu có khớp nhau không
@@ -34,7 +35,7 @@ class CustomUserChangeForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'password', 'is_active', 'is_superuser')
+        fields = ("username", "password", "is_active", "is_superuser")
 
     def clean_password(self):
         # Bảo vệ mật khẩu, trả về giá trị ban đầu
@@ -44,5 +45,5 @@ class CustomUserChangeForm(forms.ModelForm):
         if not user.is_staff():
             raise forms.ValidationError(
                 "This account is inactive.",
-                code='inactive',
+                code="inactive",
             )
