@@ -30,7 +30,7 @@ class CustomUserAdmin(BaseUserAdmin):
     search_fields = ("username",)
     ordering = ("username",)
 
-    # Loại bỏ trường is_staff ra khỏi list_filter
+    # Loại bỏ trường is_staff ra khỏi list_filter s
     list_filter = ["is_active", "is_superuser"]
 
     def get_fieldsets(self, request, obj=None):
