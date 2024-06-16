@@ -1,15 +1,12 @@
-from django.shortcuts import render
-
-from rest_framework import permissions, generics
-from rest_framework.permissions import IsAuthenticated
-from knox.auth import TokenAuthentication
-from .serializers import *
 from .models import *
+from .serializers import *
 from base.models import Profile
-from rest_framework.response import Response
 from knox.models import AuthToken
+from rest_framework.response import Response
+from rest_framework import permissions, generics
 
 from django.contrib.auth import get_user_model, authenticate
+
 User = get_user_model()
 
 
@@ -20,8 +17,8 @@ class LoginAPIView(generics.CreateAPIView):
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            username = serializer.validated_data['username']
-            password = serializer.validated_data['password']
+            username = serializer.validated_data["username"]
+            password = serializer.validated_data["password"]
 
             user = authenticate(username=username, password=password)
             if user:
