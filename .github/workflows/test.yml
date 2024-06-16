@@ -14,5 +14,5 @@ jobs:
           port: 22
           command_timeout: 200m
           script: |
-          cd /home/thanh/Desktop/backend/ 
-          echo hello world > hello.txt
+            cd /home/thanh/Desktop/backend/ 
+            echo hello world > hello.txt
