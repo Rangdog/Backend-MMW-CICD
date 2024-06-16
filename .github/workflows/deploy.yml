@@ -30,8 +30,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            cd backend
-            git pull origin main
+            cd /home/thanh/Desktop/backend/
+            git pull origin production
             pip install -r requirements.txt
             python manage.py migrate
             sudo systemctl restart nginx
