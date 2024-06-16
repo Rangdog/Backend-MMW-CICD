@@ -6,13 +6,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Create a file
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@master
         with:
           host: 192.168.1.27
           username: thanh
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: 123456
           port: 22
-          command_timeout: 200m
+          command_timeout: 30m
           script: |
             ls
             cd /home/thanh/Desktop/backend/ 
