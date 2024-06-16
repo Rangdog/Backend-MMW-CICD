@@ -12,4 +12,5 @@ jobs:
           username: thanh
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
+          command_timeout: 200m
           script: echo hello world > hello.txt
